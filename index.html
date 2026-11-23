@@ -1,0 +1,3922 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOVA // PRECISIÓN · TEST · FINAL LAUNCH</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Syne', 'Space Grotesk', 'sans-serif'],
+            spacex: ['Syne', 'Space Grotesk', 'sans-serif'],
+            sans: ['Space Grotesk', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            space: {
+              black: '#000000',
+              surface: '#0b0d10',
+              panel: '#11151b',
+              line: 'rgba(255, 255, 255, 0.14)',
+              muted: '#9ca3af',
+            },
+          },
+          letterSpacing: {
+            spacex: '0.16em',
+            wide2: '0.12em',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Reglas base y estética aeroespacial oscura de alto contraste estilo SpaceX */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000000;
+      color: #ffffff;
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .font-spacex {
+      font-family: 'Syne', 'Space Grotesk', sans-serif;
+    }
+
+    /* Botón rectangular con borde fino estilo SpaceX y barrido horizontal */
+    .btn-spacex {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      padding: 0.85rem 1.8rem;
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 2px;
+      overflow: hidden;
+      transition: color 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-spacex::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      transform: translateX(-101%);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 0;
+    }
+
+    .btn-spacex:hover::before,
+    .btn-spacex:focus-visible::before {
+      transform: translateX(0);
+    }
+
+    .btn-spacex:hover,
+    .btn-spacex:focus-visible {
+      color: #000000;
+      border-color: #ffffff;
+    }
+
+    .btn-spacex > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-spacex:active {
+      transform: scale(0.98);
+    }
+
+    /* Separador de espacio entre secciones para que no se corran pegadas */
+    .nova-section-spacer {
+      height: 18vh;
+      min-height: 110px;
+      width: 100%;
+      background: linear-gradient(to bottom, #000000 0%, #05070a 50%, #000000 100%);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Entrada hero tipo portada al entrar a expediente/sección (estilo video SpaceX) */
+    .nova-entry-hero {
+      position: relative;
+      min-height: calc(100vh - 4rem);
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      background-color: #000000;
+    }
+
+    .nova-entry-hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.16);
+      opacity: 0;
+      filter: brightness(0.45);
+      transition:
+        transform 1.55s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 1.15s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 1.35s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity, filter;
+    }
+
+    .nova-entry-hero.is-entered .nova-entry-hero-bg {
+      transform: scale(1);
+      opacity: 1;
+      filter: brightness(1);
+    }
+
+    .nova-entry-content > * {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity;
+    }
+
+    .nova-entry-hero.is-entered .nova-entry-content > *:nth-child(1) {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.1s;
+    }
+
+    .nova-entry-hero.is-entered .nova-entry-content > *:nth-child(2) {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.16s;
+    }
+
+    .nova-entry-hero.is-entered .nova-entry-content > *:nth-child(3) {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.48s;
+    }
+
+    .nova-entry-hero.is-entered .nova-entry-content > *:nth-child(4) {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.62s;
+    }
+
+    /* Animación individual por letra en el título de portada de cada sección */
+    .entry-letter {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(26px) scale(0.96);
+      filter: blur(4px);
+      transition:
+        opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: calc(0.18s + var(--char-idx, 0) * 26ms);
+      will-change: transform, opacity, filter;
+    }
+
+    .nova-entry-hero.is-entered .entry-letter {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    /* Revelado suave de bloques y palabras al hacer scroll */
+    .spacex-reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .spacex-reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .word-reveal {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, opacity;
+    }
+
+    .word-reveal.is-word-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Numerales minimalistas grandes estilo SpaceX con movimiento suave */
+    .spacex-stat-num {
+      display: inline-block;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1), transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, opacity;
+    }
+
+    .spacex-stat-num.is-num-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Escenas de fondo a pantalla completa con capas oscuras de alto contraste */
+    .hero-scene-precision {
+      background-color: #000000;
+    }
+
+    .hero-scene-test {
+      background-color: #0b0d10;
+    }
+
+    .hero-scene-launch {
+      background-image:
+        linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.72) 100%),
+        url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2200&q=85');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .spacex-band-flight {
+      background-image:
+        linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.65) 52%, rgba(0, 0, 0, 0.88) 100%),
+        url('https://images.unsplash.com/photo-1516849841032-87cb4ac3bc05?auto=format&fit=crop&w=2200&q=85');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .spacex-band-atmosphere {
+      background-image:
+        linear-gradient(to top, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.72) 55%, rgba(0, 0, 0, 0.9) 100%),
+        url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=2200&q=85');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .spacex-band-surface {
+      background-image:
+        linear-gradient(to top, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.76) 55%, rgba(0, 0, 0, 0.92) 100%),
+        url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=2200&q=85');
+      background-size: cover;
+      background-position: center;
+    }
+
+    #sim3dContainer canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Rango deslizante minimalista para la línea de tiempo del vuelo */
+    input[type="range"].sim-timeline-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"].sim-timeline-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #f97316;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 10px rgba(249, 115, 22, 0.85);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"].sim-timeline-range::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+    }
+
+    input[type="range"].sim-timeline-range::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #f97316;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 10px rgba(249, 115, 22, 0.85);
+      cursor: pointer;
+    }
+
+    /* Scrollbar discreta */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-black text-white antialiased selection:bg-white selection:text-black">
+
+  <!-- ===================================================================== -->
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR MINIMALISTA (ESTILO SPACEX)              -->
+  <!-- ===================================================================== -->
+  <header
+    id="mainHeader"
+    class="fixed top-0 left-0 right-0 z-40 border-b border-white/10 bg-black/65 backdrop-blur-md transition-colors duration-300"
+  >
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-10">
+      <!-- Marca NOVA -->
+      <a
+        id="brandHomeLink"
+        href="#precision"
+        class="group flex items-center gap-3 font-spacex text-lg sm:text-xl font-extrabold tracking-[0.22em] text-white uppercase"
+      >
+        <span>NOVA</span>
+      </a>
+
+      <!-- Enlaces principales: PRECISIÓN, TEST y FINAL LAUNCH -->
+      <nav aria-label="Navegación principal" class="hidden md:flex items-center gap-9">
+        <a
+          href="#precision"
+          data-nav-link="precision"
+          class="nav-item font-spacex text-xs sm:text-sm font-bold tracking-[0.2em] text-zinc-200 hover:text-white uppercase transition-colors py-1 border-b border-transparent"
+        >
+          PRECISIÓN
+        </a>
+        <a
+          href="#test"
+          data-nav-link="test"
+          class="nav-item font-spacex text-xs sm:text-sm font-bold tracking-[0.2em] text-zinc-200 hover:text-white uppercase transition-colors py-1 border-b border-transparent"
+        >
+          TEST
+        </a>
+        <a
+          href="#final-launch"
+          data-nav-link="final-launch"
+          class="nav-item font-spacex text-xs sm:text-sm font-bold tracking-[0.2em] text-zinc-200 hover:text-white uppercase transition-colors py-1 border-b border-transparent"
+        >
+          FINAL LAUNCH
+        </a>
+      </nav>
+
+      <!-- Botón de menú móvil -->
+      <div class="flex md:hidden items-center">
+        <button
+          id="btnMobileMenu"
+          type="button"
+          aria-expanded="false"
+          aria-controls="mobileDrawer"
+          aria-label="Abrir menú de navegación"
+          class="flex h-9 w-9 items-center justify-center rounded-[2px] border border-white/25 bg-white/5 text-white hover:border-white transition-colors cursor-pointer"
+        >
+          <svg id="menuIconOpen" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="menuIconClose" class="hidden h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Menú desplegable móvil -->
+    <div id="mobileDrawer" class="hidden md:hidden border-t border-white/10 bg-black/95 px-6 py-5 space-y-4">
+      <a
+        href="#precision"
+        data-mobile-target="precision"
+        class="mobile-nav-link block font-spacex text-sm font-bold tracking-[0.22em] text-zinc-200 hover:text-white uppercase py-2"
+      >
+        PRECISIÓN
+      </a>
+      <a
+        href="#test"
+        data-mobile-target="test"
+        class="mobile-nav-link block font-spacex text-sm font-bold tracking-[0.22em] text-zinc-200 hover:text-white uppercase py-2"
+      >
+        TEST
+      </a>
+      <a
+        href="#final-launch"
+        data-mobile-target="final-launch"
+        class="mobile-nav-link block font-spacex text-sm font-bold tracking-[0.22em] text-zinc-200 hover:text-white uppercase py-2"
+      >
+        FINAL LAUNCH
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- =================================================================== -->
+    <!-- SECCIÓN 1: PRECISIÓN                                                -->
+    <!-- =================================================================== -->
+    <section
+      id="precision"
+      data-section="precision"
+      data-overview-block
+      class="hero-scene-precision relative min-h-screen w-full overflow-hidden bg-black flex flex-col justify-end pt-24 pb-16 sm:pb-20 px-5 sm:px-10 lg:px-16"
+    >
+      <!-- Video de fondo en loop continuo a calidad nativa (PRES.MP4) sin poster estático -->
+      <video
+        id="precisionBgVideo"
+        src="./PRES.MP4"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+      >
+        <source src="./PRES.MP4" type="video/mp4" />
+        <source src="./pres.mp4" type="video/mp4" />
+        <source src="PRES.MP4" type="video/mp4" />
+      </video>
+
+      <!-- Capa de contraste oscuro estilo SpaceX sobre el video -->
+      <div
+        class="pointer-events-none absolute inset-0 z-[1]"
+        style="background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.32) 48%, rgba(0, 0, 0, 0.68) 100%);"
+      ></div>
+
+      <div class="relative z-10 mx-auto w-full max-w-7xl">
+        <div class="max-w-2xl space-y-4 sm:space-y-5">
+          <h1 data-scroll-words class="font-spacex text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[0.1em] sm:tracking-[0.14em] text-white uppercase leading-[1.02]">
+            PRECISIÓN
+          </h1>
+
+          <p data-scroll-words class="max-w-xl text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+            Análisis balístico y de dispersión en cinco lanzamientos sobre un blanco a 29.3 m.
+          </p>
+
+          <div class="pt-2">
+            <button id="btnExplorePrecision" type="button" class="btn-spacex">
+              <span>EXPLORE</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- EXPEDIENTE DE PRECISIÓN (ESPACIO PROPIO AL ENTRAR CON EXPLORE)      -->
+    <!-- =================================================================== -->
+    <div id="precision-dossier" class="hidden pt-16 bg-black">
+      <!-- Barra superior de control del expediente -->
+      <div class="sticky top-16 z-30 border-b border-white/10 bg-black/85 backdrop-blur-md">
+        <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 sm:px-10 lg:px-16 py-3">
+          <span class="font-spacex text-xs font-bold tracking-[0.22em] text-zinc-300 uppercase">
+            PRECISIÓN · EXPEDIENTE TÉCNICO
+          </span>
+          <div class="flex items-center gap-5">
+            <button
+              id="btnReplayPrecisionEntry"
+              type="button"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors cursor-pointer"
+            >
+              REPETIR ENTRADA ↻
+            </button>
+            <a
+              href="#precision-dossier"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors"
+            >
+              VOLVER ARRIBA ↑
+            </a>
+            <button
+              id="btnClosePrecisionDossier"
+              type="button"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors cursor-pointer"
+            >
+              ← VOLVER / CERRAR ×
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entrada Hero de pantalla completa estilo SpaceX al entrar a PRECISIÓN -->
+      <div
+        id="precisionEntryHero"
+        class="nova-entry-hero border-b border-white/10 px-5 sm:px-10 lg:px-16 py-20"
+      >
+        <div class="nova-entry-hero-bg overflow-hidden bg-black">
+          <video
+            id="precisionEntryVideo"
+            src="./PRES.MP4"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            class="pointer-events-none h-full w-full object-cover"
+          >
+            <source src="./PRES.MP4" type="video/mp4" />
+            <source src="./pres.mp4" type="video/mp4" />
+            <source src="PRES.MP4" type="video/mp4" />
+          </video>
+          <div
+            class="pointer-events-none absolute inset-0"
+            style="background: linear-gradient(to right, rgba(0, 0, 0, 0.86) 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0.72) 100%);"
+          ></div>
+        </div>
+
+        <div class="nova-entry-content relative z-10 mx-auto w-full max-w-7xl">
+          <div class="max-w-4xl space-y-5">
+            <div class="font-mono text-xs sm:text-sm font-semibold tracking-[0.24em] text-cyan-400 uppercase">
+              NOVA BALÍSTICA · CAMPAÑA DE TIRO A 29.3 M
+            </div>
+
+            <h2 data-entry-letters class="font-spacex text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[0.06em] text-white uppercase leading-[0.98]">
+              PRECISIÓN<br />&amp; DISPERSIÓN
+            </h2>
+
+            <p class="max-w-xl text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Cinco lanzamientos neumáticos con botella de 800 mL, 40 mL de agua, 800 g de masa y elevación de 40°. Haz scroll hacia abajo para inspeccionar parámetros, gráficas y simulación 3D.
+            </p>
+
+            <div class="pt-2">
+              <button id="btnScrollPrecisionDossier" type="button" class="btn-spacex">
+                <span>DESPLAZAR</span>
+                <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pointer-events-none hidden sm:flex flex-col items-center gap-3 absolute right-8 top-1/2 -translate-y-1/2 z-10 font-mono text-[10px] tracking-[0.3em] text-zinc-400 uppercase">
+          <span style="writing-mode: vertical-rl;">SCROLL</span>
+          <span class="h-12 w-px bg-white/30"></span>
+        </div>
+      </div>
+
+      <!-- Bloque 1: Métricas minimalistas grandes sobre fondo escénico SpaceX -->
+      <section id="precision-dossier-content" class="spacex-band-flight relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16 border-b border-white/10">
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-12">
+          <div class="max-w-2xl space-y-4">
+            <h2 data-scroll-words class="font-spacex text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+              PARÁMETROS DE CAMPAÑA
+            </h2>
+            <p data-scroll-words class="text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Cinco lanzamientos con botella de 800 mL, 40 mL de agua, 800 g de masa y elevación de 40° hacia el objetivo.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="border-l border-white/30 bg-black/65 backdrop-blur-sm p-6 space-y-2">
+              <div data-scroll-words class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">DISTANCIA OBJETIVO</div>
+              <div
+                data-count-target="29.3"
+                data-decimals="1"
+                data-suffix=" M"
+                class="spacex-stat-num font-spacex text-5xl sm:text-6xl font-extrabold text-white leading-none"
+              >
+                29.3 M
+              </div>
+              <div data-scroll-words class="text-xs sm:text-sm text-zinc-300">Tapete de tiro al blanco</div>
+            </div>
+
+            <div class="border-l border-white/30 bg-black/65 backdrop-blur-sm p-6 space-y-2">
+              <div data-scroll-words class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">MÍNIMO ERROR REGISTRADO</div>
+              <div
+                data-count-target="2.7"
+                data-decimals="1"
+                data-suffix=" M"
+                class="spacex-stat-num font-spacex text-5xl sm:text-6xl font-extrabold text-white leading-none"
+              >
+                2.7 M
+              </div>
+              <div data-scroll-words class="text-xs sm:text-sm text-zinc-300">Prueba #1 a 50 PSI</div>
+            </div>
+
+            <div class="border-l border-white/30 bg-black/65 backdrop-blur-sm p-6 space-y-2">
+              <div data-scroll-words class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">CARGA ÓPTIMA DE AGUA</div>
+              <div
+                data-count-target="40"
+                data-decimals="0"
+                data-suffix=" ML"
+                class="spacex-stat-num font-spacex text-5xl sm:text-6xl font-extrabold text-white leading-none"
+              >
+                40 ML
+              </div>
+              <div data-scroll-words class="text-xs sm:text-sm text-zinc-300">Botella 800 mL · 800 g · 40°</div>
+            </div>
+
+            <div class="border-l border-white/30 bg-black/65 backdrop-blur-sm p-6 space-y-2">
+              <div data-scroll-words class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">FACTOR CLIMÁTICO</div>
+              <div data-scroll-words class="font-spacex text-2xl sm:text-3xl font-extrabold text-white leading-tight pt-1">
+                DESVIACIÓN POR VIENTO
+              </div>
+              <div data-scroll-words class="text-xs sm:text-sm text-zinc-300">5 ensayos registrados</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bloque 2: Tabla de Resultados Teóricos y Experimentales por Prueba -->
+      <section class="spacex-band-atmosphere relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16 border-b border-white/10">
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-10">
+          <div class="max-w-3xl space-y-4">
+            <h2 data-scroll-words class="font-spacex text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+              RESULTADOS POR PRUEBA
+            </h2>
+            <p data-scroll-words class="text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Registro comparativo de presión neumática, alcance real, error frente al tapete de 29.3 m, velocidad de escape y empuje teórico.
+            </p>
+          </div>
+
+          <div class="overflow-x-auto border border-white/15 bg-black/75 backdrop-blur-md">
+            <table class="w-full text-left border-collapse font-mono text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-white/15 bg-white/5 text-zinc-300 uppercase tracking-wider">
+                  <th class="py-3.5 px-4">PRUEBA</th>
+                  <th class="py-3.5 px-4">PRESIÓN (PSI)</th>
+                  <th class="py-3.5 px-4">DISTANCIA REAL</th>
+                  <th class="py-3.5 px-4">ERROR VS TAPETE</th>
+                  <th class="py-3.5 px-4">VEL. ESCAPE (V_E)</th>
+                  <th class="py-3.5 px-4">EMPUJE (T_K)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/10 text-zinc-200">
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="py-3.5 px-4 font-semibold text-cyan-400">Prueba #1</td>
+                  <td class="py-3.5 px-4">50 PSI</td>
+                  <td class="py-3.5 px-4">32.0 m</td>
+                  <td class="py-3.5 px-4 text-rose-400">2.7 m</td>
+                  <td class="py-3.5 px-4">24.5 m/s</td>
+                  <td class="py-3.5 px-4">18.2 N</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="py-3.5 px-4 font-semibold text-purple-400">Prueba #2</td>
+                  <td class="py-3.5 px-4">55 PSI</td>
+                  <td class="py-3.5 px-4">37.0 m</td>
+                  <td class="py-3.5 px-4 text-rose-400">7.7 m</td>
+                  <td class="py-3.5 px-4">26.1 m/s</td>
+                  <td class="py-3.5 px-4">20.4 N</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="py-3.5 px-4 font-semibold text-emerald-400">Prueba #3</td>
+                  <td class="py-3.5 px-4">60 PSI</td>
+                  <td class="py-3.5 px-4">33.0 m</td>
+                  <td class="py-3.5 px-4 text-rose-400">3.7 m</td>
+                  <td class="py-3.5 px-4">27.6 m/s</td>
+                  <td class="py-3.5 px-4">22.8 N</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="py-3.5 px-4 font-semibold text-amber-400">Prueba #4</td>
+                  <td class="py-3.5 px-4">60 PSI</td>
+                  <td class="py-3.5 px-4">36.0 m</td>
+                  <td class="py-3.5 px-4 text-rose-400">6.7 m</td>
+                  <td class="py-3.5 px-4">27.6 m/s</td>
+                  <td class="py-3.5 px-4">22.8 N</td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="py-3.5 px-4 font-semibold text-rose-400">Prueba #5</td>
+                  <td class="py-3.5 px-4">50 PSI</td>
+                  <td class="py-3.5 px-4">35.0 m</td>
+                  <td class="py-3.5 px-4 text-rose-400">5.7 m</td>
+                  <td class="py-3.5 px-4">24.5 m/s</td>
+                  <td class="py-3.5 px-4">18.2 N</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bloque 3: Centro de Datos y Gráficas por Ensayo (1 al 5) -->
+      <section class="spacex-band-surface relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16 border-b border-white/10">
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-10">
+          <div class="max-w-3xl space-y-4">
+            <h2 data-scroll-words class="font-spacex text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+              TELEMETRÍA Y GRÁFICAS (P1–P5)
+            </h2>
+            <p data-scroll-words class="text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Comparativa gráfica de alcance, error absoluto, presión neumática, velocidad de escape, empuje teórico y dispersión lateral.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="border border-white/15 bg-black/75 backdrop-blur-md p-5 space-y-3">
+              <div class="font-mono text-xs font-bold text-cyan-400 uppercase">1. ALCANCE REAL VS 29.3M</div>
+              <div class="h-52 w-full">
+                <canvas id="chartAlcanceReal"></canvas>
+              </div>
+            </div>
+
+            <div class="border border-white/15 bg-black/75 backdrop-blur-md p-5 space-y-3">
+              <div class="font-mono text-xs font-bold text-rose-400 uppercase">2. ERROR ABSOLUTO (M)</div>
+              <div class="h-52 w-full">
+                <canvas id="chartErrorAbsoluto"></canvas>
+              </div>
+            </div>
+
+            <div class="border border-white/15 bg-black/75 backdrop-blur-md p-5 space-y-3">
+              <div class="font-mono text-xs font-bold text-emerald-400 uppercase">3. PRESIÓN NEUMÁTICA (PSI)</div>
+              <div class="h-52 w-full">
+                <canvas id="chartPresionNeumatica"></canvas>
+              </div>
+            </div>
+
+            <div class="border border-white/15 bg-black/75 backdrop-blur-md p-5 space-y-3">
+              <div class="font-mono text-xs font-bold text-amber-400 uppercase">4. VELOCIDAD DE ESCAPE (V_E)</div>
+              <div class="h-52 w-full">
+                <canvas id="chartVelocidadEscape"></canvas>
+              </div>
+            </div>
+
+            <div class="border border-white/15 bg-black/75 backdrop-blur-md p-5 space-y-3">
+              <div class="font-mono text-xs font-bold text-purple-400 uppercase">5. EMPUJE TEÓRICO (T_K)</div>
+              <div class="h-52 w-full">
+                <canvas id="chartEmpujeTeorico"></canvas>
+              </div>
+            </div>
+
+            <div class="border border-white/15 bg-black/75 backdrop-blur-md p-5 space-y-3">
+              <div class="font-mono text-xs font-bold text-sky-400 uppercase">6. DISPERSIÓN LATERAL (EJE Y)</div>
+              <div class="h-52 w-full">
+                <canvas id="chartDispersionLateral"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bloque 4: Simulador 3D de Trayectoria y Caída del Cohete -->
+      <section class="spacex-band-flight relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16">
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-8">
+          <div class="max-w-3xl space-y-4">
+            <h2 data-scroll-words class="font-spacex text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+              SIMULADOR 3D DE TRAYECTORIA Y CAÍDA
+            </h2>
+            <p data-scroll-words class="text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Perspectivas de cámara 3D, carga de ensayos experimentales (P1–P5) y línea de tiempo del vuelo hacia el tapete a 29.3 m.
+            </p>
+          </div>
+
+          <!-- Panel de control izquierdo (Perspectiva, Ensayos P1-P5, Línea de Tiempo) + Lienzo 3D derecho -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Columna izquierda: Controles -->
+            <div class="lg:col-span-4 border border-white/15 bg-[#0a0d12]/90 backdrop-blur-md p-5 flex flex-col justify-between space-y-6">
+              <div class="space-y-6">
+                <!-- 1. Perspectiva de Cámara 3D -->
+                <div class="space-y-2.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-mono text-[11px] font-semibold tracking-[0.14em] text-zinc-300 uppercase">
+1. PERSPECTIVA DE CÁMARA 3D
+                    </span>
+                    <button
+                      id="btnSimCenterOrbit"
+                      type="button"
+                      class="font-mono text-[11px] text-orange-400 hover:text-orange-300 transition-colors cursor-pointer"
+                    >
+                      Centrar órbita
+                    </button>
+                  </div>
+
+                  <div class="space-y-2">
+                    <button
+                      type="button"
+                      data-sim-cam="fpv"
+                      class="sim-cam-btn w-full flex items-center justify-between rounded-[2px] border border-orange-500/80 bg-orange-500/15 px-3.5 py-2.5 text-left transition-all cursor-pointer"
+                    >
+                      <span class="font-mono text-xs font-semibold text-white">FPV Persecución + Paneo 3D</span>
+                      <span data-cam-badge="fpv" class="rounded-[2px] bg-orange-500 px-2 py-0.5 font-mono text-[10px] font-bold text-black uppercase">
+                        ACTIVA
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-sim-cam="iso"
+                      class="sim-cam-btn w-full flex items-center justify-between rounded-[2px] border border-white/15 bg-black/60 hover:border-white/40 px-3.5 py-2.5 text-left transition-all cursor-pointer"
+                    >
+                      <span class="font-mono text-xs text-zinc-200">Isometría de Campo (3/4 3D)</span>
+                      <span data-cam-badge="iso" class="font-mono text-[10px] text-zinc-500 uppercase">
+                        3/4 3D
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-sim-cam="top"
+                      class="sim-cam-btn w-full flex items-center justify-between rounded-[2px] border border-white/15 bg-black/60 hover:border-white/40 px-3.5 py-2.5 text-left transition-all cursor-pointer"
+                    >
+                      <span class="font-mono text-xs text-zinc-200">Cenital de Dron (Top-Down)</span>
+                      <span data-cam-badge="top" class="font-mono text-[10px] text-zinc-500 uppercase">
+                        TOP-DOWN
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 2. Cargar Ensayo Experimental (P1-P5) + Referencia Ideal -->
+                <div class="space-y-2.5">
+                  <div class="font-mono text-[11px] font-semibold tracking-[0.14em] text-zinc-300 uppercase">
+2. CARGAR ENSAYO EXPERIMENTAL (P1-P5)
+                  </div>
+
+                  <div class="space-y-1.5">
+                    <button
+                      type="button"
+                      data-sim-trial="1"
+                      class="sim-trial-btn w-full rounded-[2px] border border-white/15 bg-black/65 hover:border-white/35 px-3.5 py-2 text-left transition-all cursor-pointer"
+                    >
+                      <div class="flex items-center justify-between font-mono text-xs font-semibold text-white">
+                        <span>Prueba #1 (50 PSI)</span>
+                        <span class="text-cyan-400">24.5 m/s</span>
+                      </div>
+                      <div class="mt-0.5 font-mono text-[11px] text-zinc-400">
+                        Alcance 32.0m · Error 2.7m · Deriva 1.1m
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-sim-trial="2"
+                      class="sim-trial-btn w-full rounded-[2px] border border-orange-500/80 bg-orange-500/15 px-3.5 py-2 text-left transition-all cursor-pointer"
+                    >
+                      <div class="flex items-center justify-between font-mono text-xs font-semibold text-orange-300">
+                        <span>Prueba #2 (55 PSI)</span>
+                        <span class="text-orange-400">26.1 m/s</span>
+                      </div>
+                      <div class="mt-0.5 font-mono text-[11px] text-zinc-300">
+                        Alcance 37.0m · Error 7.7m · Deriva 3.8m
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-sim-trial="3"
+                      class="sim-trial-btn w-full rounded-[2px] border border-white/15 bg-black/65 hover:border-white/35 px-3.5 py-2 text-left transition-all cursor-pointer"
+                    >
+                      <div class="flex items-center justify-between font-mono text-xs font-semibold text-white">
+                        <span>Prueba #3 (60 PSI)</span>
+                        <span class="text-emerald-400">27.6 m/s</span>
+                      </div>
+                      <div class="mt-0.5 font-mono text-[11px] text-zinc-400">
+                        Alcance 33.0m · Error 3.7m · Deriva 2.1m
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-sim-trial="4"
+                      class="sim-trial-btn w-full rounded-[2px] border border-white/15 bg-black/65 hover:border-white/35 px-3.5 py-2 text-left transition-all cursor-pointer"
+                    >
+                      <div class="flex items-center justify-between font-mono text-xs font-semibold text-white">
+                        <span>Prueba #4 (60 PSI)</span>
+                        <span class="text-purple-400">27.6 m/s</span>
+                      </div>
+                      <div class="mt-0.5 font-mono text-[11px] text-zinc-400">
+                        Alcance 36.0m · Error 6.7m · Deriva 4.0m
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-sim-trial="5"
+                      class="sim-trial-btn w-full rounded-[2px] border border-white/15 bg-black/65 hover:border-white/35 px-3.5 py-2 text-left transition-all cursor-pointer"
+                    >
+                      <div class="flex items-center justify-between font-mono text-xs font-semibold text-white">
+                        <span>Prueba #5 (50 PSI)</span>
+                        <span class="text-rose-400">24.5 m/s</span>
+                      </div>
+                      <div class="mt-0.5 font-mono text-[11px] text-zinc-400">
+                        Alcance 35.0m · Error 5.7m · Deriva 2.9m
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-sim-trial="ideal"
+                      class="sim-trial-btn w-full rounded-[2px] border border-white/15 bg-black/65 hover:border-white/35 px-3.5 py-2 text-left transition-all cursor-pointer"
+                    >
+                      <div class="flex items-center justify-between font-mono text-xs font-semibold text-emerald-300">
+                        <span>Referencia Ideal (Sin Viento)</span>
+                        <span class="text-emerald-400">29.3 m</span>
+                      </div>
+                      <div class="mt-0.5 font-mono text-[11px] text-zinc-400">
+                        Impacto exacto en tapete 29.3m · Deriva 0.0m
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Línea de tiempo del vuelo + Reiniciar / Repetir Vuelo -->
+              <div class="border-t border-white/15 pt-4 space-y-3">
+                <div class="flex items-center justify-between font-mono text-[11px] uppercase">
+                  <span class="text-zinc-300 tracking-[0.12em]">LÍNEA DE TIEMPO DEL VUELO</span>
+                  <span id="simTimelinePercent" class="font-bold text-orange-400">100%</span>
+                </div>
+
+                <input
+                  id="simTimelineScrubber"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="100"
+                  aria-label="Línea de tiempo del vuelo"
+                  class="sim-timeline-range"
+                />
+
+                <div class="grid grid-cols-2 gap-2.5 pt-1">
+                  <button
+                    id="btnSimReset"
+                    type="button"
+                    class="flex items-center justify-center gap-1.5 rounded-[2px] border border-white/20 bg-white/5 hover:bg-white/10 py-2 font-mono text-xs font-medium text-zinc-200 transition-colors cursor-pointer"
+                  >
+                    <span>↺</span>
+                    <span>Reiniciar</span>
+                  </button>
+
+                  <button
+                    id="btnSimReplay"
+                    type="button"
+                    class="flex items-center justify-center gap-1.5 rounded-[2px] border border-orange-500 bg-orange-500 hover:bg-orange-400 py-2 font-mono text-xs font-bold text-black transition-colors cursor-pointer"
+                  >
+                    <span id="btnSimReplayIcon">▶</span>
+                    <span id="btnSimReplayLabel">Repetir Vuelo</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna derecha: Escena 3D táctica con HUD superior derecho, píldora de trayectoria y etiquetas -->
+            <div class="lg:col-span-8 relative min-h-[480px] sm:min-h-[560px] border border-white/15 bg-[#06090f] overflow-hidden select-none">
+              <div id="sim3dContainer" class="absolute inset-0 w-full h-full"></div>
+
+              <!-- Etiquetas proyectadas en 3D (10m..60m, 29.3m TAPETE y píldora ALCANCE | ERROR | DERIVA) -->
+              <div id="sim3dOverlayLabels" class="pointer-events-none absolute inset-0 overflow-hidden">
+                <div
+                  id="simTrajectoryPill"
+                  class="hidden sm:flex items-center gap-2 rounded-[2px] border border-orange-400/70 bg-[#12161f]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white shadow-lg backdrop-blur-sm -translate-x-1/2 -translate-y-1/2"
+                >
+                  <span id="pillRangeText" class="text-orange-300">ALCANCE: 37.0m</span>
+                  <span class="text-zinc-500">|</span>
+                  <span id="pillErrorText" class="text-rose-400">ERROR: 7.7m</span>
+                  <span class="text-zinc-500">|</span>
+                  <span id="pillDriftText" class="text-amber-300">DERIVA: 3.8m</span>
+                </div>
+
+                <div
+                  id="simTargetLabel"
+                  class="font-mono text-xs font-bold tracking-wider text-orange-400 drop-shadow-[0_1px_6px_rgba(0,0,0,0.95)] -translate-x-1/2"
+                >
+                  29.3m TAPETE
+                </div>
+
+                <div id="simAxisMarkersContainer" class="absolute inset-0"></div>
+              </div>
+
+              <!-- Tarjeta de telemetría superior derecha dentro del visor 3D -->
+              <div class="pointer-events-none absolute top-4 right-4 z-10 w-[250px] sm:w-[275px] rounded-[3px] border border-white/15 bg-[#0b0f17]/90 p-3.5 font-mono text-[11px] text-zinc-200 backdrop-blur-md shadow-2xl">
+                <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2.5">
+                  <span id="hudTrialTitle" class="font-bold text-orange-400 uppercase">PRUEBA #2 (55 PSI)</span>
+                  <span class="text-[10px] text-zinc-400 uppercase">TELEMETRÍA 3D</span>
+                </div>
+
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-zinc-400">CÁMARA:</span>
+                    <span id="hudCamMode" class="font-semibold text-white text-right">FPV PERSECUCIÓN + PANEO 3D</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-zinc-400">DISTANCIA:</span>
+                    <span id="hudDistance" class="font-semibold text-white">37.0 m</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-zinc-400">ALTITUD:</span>
+                    <span id="hudAltitude" class="font-semibold text-white">0.0 m</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-zinc-400">DERIVA LATERAL:</span>
+                    <span id="hudDrift" class="font-semibold text-amber-300">3.8 m</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-zinc-400">VEL. ESCAPE:</span>
+                    <span id="hudVelEscape" class="font-semibold text-cyan-300">26.1 m/s</span>
+                  </div>
+                </div>
+
+                <div class="mt-2.5 border-t border-white/10 pt-2 text-[10px] font-semibold uppercase tracking-wide">
+                  <span class="text-zinc-400">ESTADO: </span>
+                  <span id="hudStatusText" class="text-rose-400">FUERA DE DIANA (DESVIACIÓN POR VIENTO)</span>
+                </div>
+              </div>
+
+              <!-- Ayuda inferior de interacción -->
+              <div class="pointer-events-none absolute bottom-3 left-4 rounded-[2px] border border-white/10 bg-black/70 px-3 py-1 font-mono text-[10px] text-zinc-300 backdrop-blur-sm">
+                Arrastra para rotar cámara · Rueda para zoom
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Espacio de separación entre secciones -->
+    <div class="nova-section-spacer" data-overview-block aria-hidden="true"></div>
+
+    <!-- =================================================================== -->
+    <!-- SECCIÓN 2: TEST                                                     -->
+    <!-- =================================================================== -->
+    <section
+      id="test"
+      data-section="test"
+      data-overview-block
+      class="hero-scene-test relative min-h-screen w-full overflow-hidden bg-[#0b0d10] flex flex-col justify-end pt-24 pb-16 sm:pb-20 px-5 sm:px-10 lg:px-16 border-t border-white/10"
+    >
+      <!-- Video de fondo en loop continuo a calidad nativa (TEST.MP4) sin poster estático -->
+      <video
+        id="testBgVideo"
+        src="./TEST.MP4"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+      >
+        <source src="./TEST.MP4" type="video/mp4" />
+        <source src="./test.mp4" type="video/mp4" />
+        <source src="TEST.MP4" type="video/mp4" />
+      </video>
+
+      <!-- Capa de contraste oscuro estilo SpaceX sobre el video -->
+      <div
+        class="pointer-events-none absolute inset-0 z-[1]"
+        style="background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.38) 50%, rgba(0, 0, 0, 0.68) 100%);"
+      ></div>
+
+      <div class="relative z-10 mx-auto w-full max-w-7xl">
+        <div class="max-w-2xl space-y-4 sm:space-y-5">
+          <h2 data-scroll-words class="font-spacex text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[0.1em] sm:tracking-[0.14em] text-white uppercase leading-[1.02]">
+            TEST
+          </h2>
+
+          <p data-scroll-words class="max-w-xl text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+            Aviónica, almacenamiento de datos, sensores, protocolos de prueba y piezas diseñadas para el banco de test y vuelo.
+          </p>
+
+          <div class="pt-2">
+            <button id="btnExploreTest" type="button" class="btn-spacex">
+              <span>EXPLORE</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- EXPEDIENTE DE TEST (ESPACIO PROPIO AL ENTRAR CON EXPLORE)           -->
+    <!-- =================================================================== -->
+    <div id="test-dossier" class="hidden pt-16 bg-black">
+      <!-- Barra superior de control del expediente TEST -->
+      <div class="sticky top-16 z-30 border-b border-white/10 bg-black/85 backdrop-blur-md">
+        <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 sm:px-10 lg:px-16 py-3">
+          <span class="font-spacex text-xs font-bold tracking-[0.22em] text-zinc-300 uppercase">
+            TEST · ALMACENAMIENTO DE DATOS Y TELEMETRÍA
+          </span>
+          <div class="flex items-center gap-5">
+            <button
+              id="btnReplayTestEntry"
+              type="button"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors cursor-pointer"
+            >
+              REPETIR ENTRADA ↻
+            </button>
+            <a
+              href="#test-dossier"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors"
+            >
+              VOLVER ARRIBA ↑
+            </a>
+            <button
+              id="btnCloseTestDossier"
+              type="button"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors cursor-pointer"
+            >
+              ← VOLVER / CERRAR ×
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entrada Hero de pantalla completa estilo SpaceX al entrar a TEST -->
+      <div
+        id="testEntryHero"
+        class="nova-entry-hero border-b border-white/10 px-5 sm:px-10 lg:px-16 py-20"
+      >
+        <div class="nova-entry-hero-bg overflow-hidden bg-[#0b0d10]">
+          <video
+            id="testEntryVideo"
+            src="./TEST.MP4"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            class="pointer-events-none h-full w-full object-cover"
+          >
+            <source src="./TEST.MP4" type="video/mp4" />
+            <source src="./test.mp4" type="video/mp4" />
+            <source src="TEST.MP4" type="video/mp4" />
+          </video>
+          <div
+            class="pointer-events-none absolute inset-0"
+            style="background: linear-gradient(to right, rgba(0, 0, 0, 0.86) 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0.72) 100%);"
+          ></div>
+        </div>
+
+        <div class="nova-entry-content relative z-10 mx-auto w-full max-w-7xl">
+          <div class="max-w-4xl space-y-5">
+            <div class="font-mono text-xs sm:text-sm font-semibold tracking-[0.24em] text-cyan-400 uppercase">
+              NOVA AVIONICS · LORA 915 MHZ &amp; MICRO SD
+            </div>
+
+            <h3 data-entry-letters class="font-spacex text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[0.06em] text-white uppercase leading-[0.98]">
+              TELEMETRÍA<br />&amp; BANCO TEST
+            </h3>
+
+            <p class="max-w-xl text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Registro de 36 paquetes telemétricos, enlace RF, sensores inerciales/GNSS y estación terrena. Haz scroll hacia abajo para inspeccionar los datos completos.
+            </p>
+
+            <div class="pt-2">
+              <button id="btnScrollTestDossier" type="button" class="btn-spacex">
+                <span>DESPLAZAR</span>
+                <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pointer-events-none hidden sm:flex flex-col items-center gap-3 absolute right-8 top-1/2 -translate-y-1/2 z-10 font-mono text-[10px] tracking-[0.3em] text-zinc-400 uppercase">
+          <span style="writing-mode: vertical-rl;">SCROLL</span>
+          <span class="h-12 w-px bg-white/30"></span>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- BLOQUE TEST: ALMACENAMIENTO DE DATOS Y TELEMETRÍA SISTEMA NOVA    -->
+      <!-- ================================================================= -->
+      <section
+        id="nova-telemetry-storage"
+        class="spacex-band-atmosphere relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16 border-b border-white/10"
+      >
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-12">
+          <div class="max-w-3xl space-y-4">
+            <div class="font-mono text-xs font-bold tracking-[0.24em] text-cyan-400 uppercase">
+              SISTEMA NOVA · REGISTRO TELEMÉTRICO LORA 915 MHZ + MICRO SD
+            </div>
+            <h3 data-scroll-words class="font-spacex text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+              ALMACENAMIENTO DE DATOS Y TELEMETRÍA
+            </h3>
+            <p data-scroll-words class="text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Validación de captura, transmisión inalámbrica en tiempo real hacia estación terrena y respaldo en memoria no volátil a 12 m, 22 m y 31 m de alcance operativo.
+            </p>
+          </div>
+
+          <!-- 4 Tarjetas Resumen estilo SpaceX con contadores animados -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="border-l border-white/35 bg-black/70 backdrop-blur-sm p-6 space-y-2">
+              <div data-scroll-words class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">
+                PAQUETES ALMACENADOS
+              </div>
+              <div
+                data-count-target="36"
+                data-decimals="0"
+                data-suffix=" PKT"
+                class="spacex-stat-num font-spacex text-5xl sm:text-6xl font-extrabold text-white leading-none"
+              >
+                36 PKT
+              </div>
+              <div data-scroll-words class="text-xs sm:text-sm text-zinc-300">
+                16 a 12 m · 11 a 22 m · 9 a 31 m
+              </div>
+            </div>
+
+            <div class="border-l border-cyan-400/60 bg-black/70 backdrop-blur-sm p-6 space-y-2">
+              <div data-scroll-words class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">
+                MEJOR RSSI PROMEDIO
+              </div>
+              <div
+                data-count-target="-74.7"
+                data-decimals="1"
+                data-suffix=" DBM"
+                class="spacex-stat-num font-spacex text-5xl sm:text-6xl font-extrabold text-white leading-none"
+              >
+                -74.7 DBM
+              </div>
+              <div data-scroll-words class="text-xs sm:text-sm text-zinc-300">
+                Prueba 22 m · Pico máximo -73 dBm
+              </div>
+            </div>
+
+            <div class="border-l border-emerald-400/60 bg-black/70 backdrop-blur-sm p-6 space-y-2">
+              <div data-scroll-words class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">
+                INTEGRIDAD IMU
+              </div>
+              <div
+                data-count-target="100"
+                data-decimals="0"
+                data-suffix=" %"
+                class="spacex-stat-num font-spacex text-5xl sm:text-6xl font-extrabold text-white leading-none"
+              >
+                100 %
+              </div>
+              <div data-scroll-words class="text-xs sm:text-sm text-zinc-300">
+                MPU_OK = 1 en 36/36 pkts · Hasta 19 sats GPS
+              </div>
+            </div>
+
+            <div class="border-l border-amber-400/60 bg-black/70 backdrop-blur-sm p-6 space-y-2">
+              <div data-scroll-words class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">
+                ALCANCE MÁXIMO EVALUADO
+              </div>
+              <div
+                data-count-target="31"
+                data-decimals="0"
+                data-suffix=" M"
+                class="spacex-stat-num font-spacex text-5xl sm:text-6xl font-extrabold text-white leading-none"
+              >
+                31 M
+              </div>
+              <div data-scroll-words class="text-xs sm:text-sm text-zinc-300">
+                Activación Servo = 1 y Pantalla = 2 (9/9 pkts)
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabla Comparativa Consolidada por Distancia (12 m vs. 22 m vs. 31 m) -->
+      <section class="spacex-band-surface relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16 border-b border-white/10">
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-10">
+          <div class="max-w-3xl space-y-4">
+            <h3 data-scroll-words class="font-spacex text-3xl sm:text-5xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+              COMPARATIVA CONSOLIDADA POR DISTANCIA
+            </h3>
+            <p data-scroll-words class="text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Síntesis estadística de calidad de enlace RF, estabilidad inercial, telemetría ambiental, posicionamiento GNSS y actuación del servo en los tres ensayos.
+            </p>
+          </div>
+
+          <div class="overflow-x-auto border border-white/15 bg-black/80 backdrop-blur-md">
+            <table class="w-full text-left border-collapse font-mono text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-white/15 bg-white/5 text-zinc-300 uppercase tracking-wider">
+                  <th class="py-3.5 px-4">PRUEBA / ARCHIVO</th>
+                  <th class="py-3.5 px-4">PKT</th>
+                  <th class="py-3.5 px-4">RSSI PROM (MÁX / MÍN)</th>
+                  <th class="py-3.5 px-4">AY / ACEL. TOTAL</th>
+                  <th class="py-3.5 px-4">TEMP / PRESIÓN</th>
+                  <th class="py-3.5 px-4">SATÉLITES GPS (FIX)</th>
+                  <th class="py-3.5 px-4">ESTADO SERVO / UI</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/10 text-zinc-200">
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="py-4 px-4">
+                    <div class="font-bold text-cyan-400">PRUEBA #1 · 12 M</div>
+                    <div class="text-[11px] text-zinc-400">NOVA 12 METROS.xlsx</div>
+                  </td>
+                  <td class="py-4 px-4 font-bold text-white">16</td>
+                  <td class="py-4 px-4">
+                    <span class="font-bold text-white">-79.56 dBm</span>
+                    <div class="text-[11px] text-zinc-400">Máx -74 / Mín -86 dBm</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div>Ay: 9.88 m/s²</div>
+                    <div class="text-[11px] text-zinc-400">Tot: 9.95 m/s²</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div>30.45 °C</div>
+                    <div class="text-[11px] text-zinc-400">646.0 mmHg</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="text-emerald-400">14.4 sats (15/16 fix)</div>
+                    <div class="text-[11px] text-zinc-400">Pkt 1 en búsqueda (0 sats)</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="text-zinc-300">Servo: 0 activaciones</div>
+                    <div class="text-[11px] text-zinc-400">Pantalla: 0 · Anim: 0</div>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="py-4 px-4">
+                    <div class="font-bold text-emerald-400">PRUEBA #2 · 22 M</div>
+                    <div class="text-[11px] text-zinc-400">NOVA 22 METROS.xlsx</div>
+                  </td>
+                  <td class="py-4 px-4 font-bold text-white">11</td>
+                  <td class="py-4 px-4">
+                    <span class="font-bold text-emerald-400">-74.73 dBm</span>
+                    <div class="text-[11px] text-zinc-400">Máx -73 / Mín -77 dBm</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div>Ay: 9.82 m/s²</div>
+                    <div class="text-[11px] text-zinc-400">Tot: 9.85 m/s²</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div>28.60 °C</div>
+                    <div class="text-[11px] text-zinc-400">645.87 mmHg</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="text-emerald-400">19.0 sats (11/11 fix)</div>
+                    <div class="text-[11px] text-zinc-400">Lock satelital continuo</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="text-zinc-300">Servo: 0 activaciones</div>
+                    <div class="text-[11px] text-zinc-400">Pantalla: 0 · Anim: 0</div>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="py-4 px-4">
+                    <div class="font-bold text-amber-400">PRUEBA #3 · 31 M</div>
+                    <div class="text-[11px] text-zinc-400">NOVA 32 METROS.xlsx (Prueba_31m)</div>
+                  </td>
+                  <td class="py-4 px-4 font-bold text-white">9</td>
+                  <td class="py-4 px-4">
+                    <span class="font-bold text-white">-80.33 dBm</span>
+                    <div class="text-[11px] text-zinc-400">Máx -78 / Mín -82 dBm</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div>Ay: 9.83 m/s²</div>
+                    <div class="text-[11px] text-zinc-400">Tot: 9.85 m/s²</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div>28.60 °C</div>
+                    <div class="text-[11px] text-zinc-400">645.80 mmHg</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="text-emerald-400">18.0 sats (9/9 fix)</div>
+                    <div class="text-[11px] text-zinc-400">Lock satelital continuo</div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="font-bold text-amber-400">Servo: 1 (9/9 activos)</div>
+                    <div class="text-[11px] text-zinc-300">Pantalla: 2 · Anim: 0</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Aviso / Feedback técnico para próximas iteraciones de vuelo -->
+          <div class="border-l-2 border-amber-400 border-t border-r border-b border-white/15 bg-black/80 backdrop-blur-md p-6 sm:p-8 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="font-spacex text-xs sm:text-sm font-extrabold tracking-[0.22em] text-amber-400 uppercase">
+                ¡FEEDBACK! // AVISO PARA PRÓXIMAS PRUEBAS
+              </span>
+              <span class="font-mono text-[11px] text-zinc-400 uppercase tracking-wider">
+                NOVA AVIONICS · ROADMAP FIRMWARE v2.0
+              </span>
+            </div>
+
+            <p class="text-sm sm:text-base text-zinc-200 leading-relaxed">
+              Para las próximas pruebas de lanzamiento se deberá <strong class="text-white font-semibold">crear un nuevo código de adquisición y telemetría</strong> que incorpore dos variables adicionales en la trama de datos:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 font-mono text-xs sm:text-sm">
+              <div class="border border-white/15 bg-white/[0.03] p-4 space-y-1">
+                <div class="font-bold text-cyan-400 uppercase">01 · PORCENTAJE DE HUMEDAD (% HR)</div>
+                <div class="text-zinc-300 text-xs leading-relaxed">
+                  Habilitar la lectura y envío continuo de humedad relativa desde el sensor ambiental junto con la temperatura.
+                </div>
+              </div>
+              <div class="border border-white/15 bg-white/[0.03] p-4 space-y-1">
+                <div class="font-bold text-emerald-400 uppercase">02 · ALTITUD DE VUELO (M)</div>
+                <div class="text-zinc-300 text-xs leading-relaxed">
+                  Integrar el cálculo de altitud barométrica relativa a partir de la presión atmosférica y el punto de lanzamiento.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Gráficas Telemétricas Chart.js del Sistema NOVA -->
+      <section class="spacex-band-flight relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16 border-b border-white/10">
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-10">
+          <div class="max-w-3xl space-y-4">
+            <h3 data-scroll-words class="font-spacex text-3xl sm:text-5xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+              ANÁLISIS TELEMÉTRICO LORA Y SENSORES
+            </h3>
+            <p data-scroll-words class="text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Comportamiento dinámico de potencia de señal RSSI por paquete, envolvente de enlace RF y estabilidad inercial/GNSS entre pruebas.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="border border-white/15 bg-black/80 backdrop-blur-md p-5 space-y-3">
+              <div class="flex items-center justify-between font-mono text-xs font-bold uppercase">
+                <span class="text-cyan-400">1. EVOLUCIÓN RSSI (DBM) POR PAQUETE</span>
+                <span class="text-[10px] text-zinc-400">12M · 22M · 31M</span>
+              </div>
+              <div class="h-60 w-full">
+                <canvas id="chartNovaRssiSeries"></canvas>
+              </div>
+            </div>
+
+            <div class="border border-white/15 bg-black/80 backdrop-blur-md p-5 space-y-3">
+              <div class="flex items-center justify-between font-mono text-xs font-bold uppercase">
+                <span class="text-emerald-400">2. RSSI PROMEDIO, MÁXIMO Y MÍNIMO</span>
+                <span class="text-[10px] text-zinc-400">DBM</span>
+              </div>
+              <div class="h-60 w-full">
+                <canvas id="chartNovaRssiStats"></canvas>
+              </div>
+            </div>
+
+            <div class="border border-white/15 bg-black/80 backdrop-blur-md p-5 space-y-3">
+              <div class="flex items-center justify-between font-mono text-xs font-bold uppercase">
+                <span class="text-amber-400">3. ACEL. TOTAL (M/S²) Y SATÉLITES GPS</span>
+                <span class="text-[10px] text-zinc-400">FIX PROMEDIO</span>
+              </div>
+              <div class="h-60 w-full">
+                <canvas id="chartNovaAccelGps"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Registro Interactivo Paquete por Paquete (36 Paquetes Exactos) -->
+      <section class="spacex-band-atmosphere relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16">
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-8">
+          <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div class="max-w-3xl space-y-3">
+              <div class="font-mono text-xs font-bold tracking-[0.22em] text-zinc-400 uppercase">
+                DUMP DE MEMORIA · TELEMETRÍA EN VIVO VS MICRO SD
+              </div>
+              <h3 data-scroll-words class="font-spacex text-3xl sm:text-5xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+                REGISTRO PAQUETE POR PAQUETE
+              </h3>
+              <p class="font-mono text-xs sm:text-sm text-emerald-400 border-l-2 border-emerald-400 bg-emerald-500/5 pl-3.5 py-1.5 leading-relaxed">
+                ● VALIDACIÓN MICRO SD: La tarjeta Micro SD a bordo arrojó exactamente los mismos datos (36/36 paquetes idénticos) que los recibidos en tiempo real por la Estación de Tierra.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <span id="novaLogCounterBadge" class="border border-white/20 bg-black/75 px-3.5 py-2 font-mono text-xs text-zinc-300 uppercase">
+                MOSTRANDO 36 / 36 PAQUETES
+              </span>
+              <button
+                id="btnExportNovaCsv"
+                type="button"
+                class="btn-spacex !py-2.5 !px-5 !text-xs"
+              >
+                <span>EXPORTAR CSV</span>
+                <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Barra de Pestañas por Prueba y Filtros Rápidos -->
+          <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-white/15 pb-5">
+            <div class="flex flex-wrap items-center gap-2" id="novaDistTabs">
+              <button
+                type="button"
+                data-nova-dist="all"
+                class="nova-dist-btn px-3.5 py-2 font-spacex text-[11px] font-bold tracking-[0.18em] uppercase border border-white bg-white text-black transition-all cursor-pointer"
+              >
+                TODOS (36 PKT)
+              </button>
+              <button
+                type="button"
+                data-nova-dist="12"
+                class="nova-dist-btn px-3.5 py-2 font-spacex text-[11px] font-bold tracking-[0.18em] uppercase border border-white/20 bg-black/60 text-zinc-300 hover:border-white/60 transition-all cursor-pointer"
+              >
+                PRUEBA 01 · 12 M (16 PKT)
+              </button>
+              <button
+                type="button"
+                data-nova-dist="22"
+                class="nova-dist-btn px-3.5 py-2 font-spacex text-[11px] font-bold tracking-[0.18em] uppercase border border-white/20 bg-black/60 text-zinc-300 hover:border-white/60 transition-all cursor-pointer"
+              >
+                PRUEBA 02 · 22 M (11 PKT)
+              </button>
+              <button
+                type="button"
+                data-nova-dist="31"
+                class="nova-dist-btn px-3.5 py-2 font-spacex text-[11px] font-bold tracking-[0.18em] uppercase border border-white/20 bg-black/60 text-zinc-300 hover:border-white/60 transition-all cursor-pointer"
+              >
+                PRUEBA 03 · 31 M (9 PKT)
+              </button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2" id="novaStatusFilters">
+              <span class="font-mono text-[11px] text-zinc-400 uppercase mr-1">FILTRO:</span>
+              <button
+                type="button"
+                data-nova-status="all"
+                class="nova-status-btn px-3 py-1.5 font-mono text-[11px] font-semibold uppercase border border-cyan-400 bg-cyan-400/15 text-cyan-300 transition-all cursor-pointer"
+              >
+                TODOS
+              </button>
+              <button
+                type="button"
+                data-nova-status="servo"
+                class="nova-status-btn px-3 py-1.5 font-mono text-[11px] font-semibold uppercase border border-white/20 bg-black/60 text-zinc-300 hover:border-white/50 transition-all cursor-pointer"
+              >
+                SERVO ACTIVO (1)
+              </button>
+              <button
+                type="button"
+                data-nova-status="gps"
+                class="nova-status-btn px-3 py-1.5 font-mono text-[11px] font-semibold uppercase border border-white/20 bg-black/60 text-zinc-300 hover:border-white/50 transition-all cursor-pointer"
+              >
+                GPS FIX (1)
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla Scrollable con los 18 campos telemétricos exactos -->
+          <div class="overflow-auto max-h-[500px] border border-white/15 bg-black/85 backdrop-blur-md">
+            <table class="w-full text-left border-collapse font-mono text-xs whitespace-nowrap">
+              <thead class="sticky top-0 z-10 bg-[#0b0e14] border-b border-white/20 text-zinc-300 uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-3">Paquete</th>
+                  <th class="py-3 px-3">Dist (m)</th>
+                  <th class="py-3 px-3">Sistema</th>
+                  <th class="py-3 px-3">Pantalla</th>
+                  <th class="py-3 px-3">Anim</th>
+                  <th class="py-3 px-3">MPU_OK</th>
+                  <th class="py-3 px-3">Ax</th>
+                  <th class="py-3 px-3">Ay</th>
+                  <th class="py-3 px-3">Az</th>
+                  <th class="py-3 px-3">Total (m/s²)</th>
+                  <th class="py-3 px-3">Servo</th>
+                  <th class="py-3 px-3">Temp (°C)</th>
+                  <th class="py-3 px-3">Pres (mmHg)</th>
+                  <th class="py-3 px-3">Sats</th>
+                  <th class="py-3 px-3">GPS_OK</th>
+                  <th class="py-3 px-3">Lat</th>
+                  <th class="py-3 px-3">Lon</th>
+                  <th class="py-3 px-3">RSSI (dBm)</th>
+                </tr>
+              </thead>
+              <tbody id="novaPacketTableBody" class="divide-y divide-white/10 text-zinc-200"></tbody>
+            </table>
+          </div>
+
+          <!-- Bloque estilo SpaceX ("ESTACIÓN TIERRA" · WATCH NOW →) después de la tabla -->
+          <div id="novaVideoShowcase" class="pt-14 sm:pt-20 border-t border-white/10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center bg-black py-6">
+              <!-- Columna izquierda: Vista previa de video con borde difuminado hacia el negro -->
+              <div
+                id="novaEstacionTierraPreviewCard"
+                role="button"
+                tabindex="0"
+                aria-label="Reproducir video Estación Tierra"
+                class="group relative lg:col-span-7 aspect-video w-full overflow-hidden bg-black cursor-pointer"
+              >
+                <video
+                  id="novaPreviewLoopVideo"
+                  src="./EARTH.MP4"
+                  autoplay
+                  muted
+                  loop
+                  playsinline
+                  preload="auto"
+                  class="h-full w-full object-cover opacity-85 transition-transform duration-700 group-hover:scale-[1.03]"
+                >
+                  <source src="./EARTH.MP4" type="video/mp4" />
+                  <source src="./earth.mp4" type="video/mp4" />
+                  <source src="EARTH.MP4" type="video/mp4" />
+                </video>
+
+                <!-- Difuminado perimetral estilo SpaceX hacia el fondo negro -->
+                <div
+                  class="pointer-events-none absolute inset-0"
+                  style="background: radial-gradient(ellipse at center, rgba(0,0,0,0) 48%, rgba(0,0,0,0.72) 84%, #000000 100%), linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 18%, rgba(0,0,0,0) 75%, #000000 100%), linear-gradient(to top, #000000 0%, rgba(0,0,0,0) 22%);"
+                ></div>
+
+                <!-- Indicador discreto de reproducción -->
+                <div class="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] text-zinc-200 uppercase">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full border border-white/60 bg-black/60 text-white transition-colors group-hover:bg-white group-hover:text-black">
+                    ▶
+                  </span>
+                  <span id="novaPreviewVideoLabel">ESTACIÓN TIERRA · EARTH.MP4</span>
+                </div>
+              </div>
+
+              <!-- Columna derecha: Título ESTACIÓN TIERRA, descripción y botón WATCH NOW → -->
+              <div class="lg:col-span-5 space-y-5 px-1 sm:px-2">
+                <h4 class="font-spacex text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[0.1em] text-white uppercase leading-tight">
+                  ESTACIÓN TIERRA
+                </h4>
+                <p class="text-sm sm:text-base text-zinc-300 leading-relaxed">
+                  Registro visual de la estación terrena NOVA recibiendo paquetes telemétricos LoRa 915 MHz en tiempo real durante las pruebas de alcance.
+                </p>
+                <div class="pt-1 flex flex-wrap items-center gap-3">
+                  <button
+                    id="btnOpenEstacionTierraModal"
+                    type="button"
+                    class="btn-spacex"
+                  >
+                    <span>WATCH NOW</span>
+                    <span aria-hidden="true">→</span>
+                  </button>
+
+                  <label
+                    for="novaVideoFileInput"
+                    class="inline-flex items-center justify-center border border-white/20 hover:border-white/60 bg-black px-3.5 py-3 font-mono text-[11px] font-semibold tracking-wider text-zinc-400 hover:text-white uppercase transition-colors cursor-pointer rounded-[2px]"
+                    title="Cargar video local desde tu carpeta"
+                  >
+                    <span>CARGAR VIDEO</span>
+                    <input
+                      id="novaVideoFileInput"
+                      type="file"
+                      accept="video/*,.mp4,.MP4"
+                      class="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL REPRODUCTOR ESTILO SPACEX ("‹ VIEW ALL CONTENT")              -->
+    <!-- =================================================================== -->
+    <div
+      id="novaSpaceXVideoModal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Reproductor Estación Tierra"
+      class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md overflow-y-auto"
+    >
+      <div class="mx-auto flex min-h-screen max-w-7xl flex-col justify-between px-5 sm:px-10 py-6">
+        <!-- Barra superior estilo SpaceX: ‹ VIEW ALL CONTENT -->
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <button
+            id="btnCloseEstacionTierraModal"
+            type="button"
+            class="inline-flex items-center gap-2.5 font-spacex text-xs sm:text-sm font-bold tracking-[0.2em] text-zinc-200 hover:text-white uppercase transition-colors cursor-pointer"
+          >
+            <span aria-hidden="true">‹</span>
+            <span>VIEW ALL CONTENT</span>
+          </button>
+
+          <span class="font-mono text-xs tracking-[0.2em] text-zinc-400 uppercase">
+            NOVA // ESTACIÓN TIERRA
+          </span>
+        </div>
+
+        <!-- Cuerpo principal: Reproductor a la izquierda + Lista lateral derecha estilo SpaceX -->
+        <div class="my-auto py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div class="lg:col-span-9 space-y-4">
+            <div class="relative aspect-video w-full overflow-hidden border border-white/15 bg-black">
+              <video
+                id="novaModalVideoPlayer"
+                src="./EARTH.MP4"
+                controls
+                playsinline
+                preload="auto"
+                class="h-full w-full object-contain bg-black"
+              >
+                <source src="./EARTH.MP4" type="video/mp4" />
+                <source src="./earth.mp4" type="video/mp4" />
+                <source src="EARTH.MP4" type="video/mp4" />
+              </video>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-zinc-400">
+              <span id="novaModalVideoCaption" class="text-white font-semibold uppercase">
+                ESTACIÓN TIERRA · EARTH.MP4 (RECEPCIÓN LORA 915 MHZ)
+              </span>
+              <span id="novaVideoStatusLabel" class="uppercase text-emerald-400">
+                ● ARCHIVO LOCAL: EARTH.MP4
+              </span>
+            </div>
+          </div>
+
+          <!-- Panel lateral estilo SpaceX (TOTAL 1) -->
+          <div class="lg:col-span-3 border-t lg:border-t-0 lg:border-l border-white/15 pt-5 lg:pt-0 lg:pl-6 space-y-4">
+            <div class="space-y-1">
+              <div class="font-spacex text-lg font-extrabold tracking-[0.14em] text-white uppercase">
+                NOVA TEST
+              </div>
+              <div class="font-mono text-xs text-zinc-400 uppercase tracking-wider">
+                TOTAL 1
+              </div>
+            </div>
+
+            <div class="border border-white/35 bg-white/[0.06] p-2.5 flex items-center gap-3">
+              <div class="relative h-14 w-24 shrink-0 overflow-hidden bg-zinc-900 border border-white/15">
+                <img
+                  src="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=600&q=70"
+                  alt="Estación Tierra"
+                  class="h-full w-full object-cover opacity-75"
+                />
+              </div>
+              <div class="min-w-0 space-y-1">
+                <div class="font-spacex text-xs font-bold tracking-wider text-white uppercase truncate">
+                  Estación Tierra
+                </div>
+                <div id="novaModalSideFileLabel" class="font-mono text-[11px] text-emerald-400">
+                  EARTH.MP4
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Espacio de separación entre secciones -->
+    <div class="nova-section-spacer" data-overview-block aria-hidden="true"></div>
+
+    <!-- =================================================================== -->
+    <!-- SECCIÓN 3: FINAL LAUNCH                                             -->
+    <!-- =================================================================== -->
+    <section
+      id="final-launch"
+      data-section="final-launch"
+      data-overview-block
+      class="hero-scene-launch relative min-h-screen w-full overflow-hidden bg-black flex flex-col justify-end pt-24 pb-16 sm:pb-20 px-5 sm:px-10 lg:px-16 border-t border-white/10"
+    >
+      <div class="relative z-10 mx-auto w-full max-w-7xl">
+        <div class="max-w-2xl space-y-4 sm:space-y-5">
+          <h2 data-scroll-words class="font-spacex text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[0.1em] sm:tracking-[0.14em] text-white uppercase leading-[1.02]">
+            FINAL LAUNCH
+          </h2>
+
+          <p data-scroll-words class="max-w-xl text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+            Secuencia y registro operativo del lanzamiento final.
+          </p>
+
+          <div class="pt-2">
+            <button id="btnExploreLaunch" type="button" class="btn-spacex">
+              <span>EXPLORE</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- EXPEDIENTE DE FINAL LAUNCH (ESPACIO PROPIO AL ENTRAR CON EXPLORE)   -->
+    <!-- =================================================================== -->
+    <div id="launch-dossier" class="hidden pt-16 bg-black">
+      <!-- Barra superior de control del expediente FINAL LAUNCH -->
+      <div class="sticky top-16 z-30 border-b border-white/10 bg-black/85 backdrop-blur-md">
+        <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 sm:px-10 lg:px-16 py-3">
+          <span class="font-spacex text-xs font-bold tracking-[0.22em] text-zinc-300 uppercase">
+            FINAL LAUNCH · EXPEDIENTE DE MISIÓN
+          </span>
+          <div class="flex items-center gap-5">
+            <button
+              id="btnReplayLaunchEntry"
+              type="button"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors cursor-pointer"
+            >
+              REPETIR ENTRADA ↻
+            </button>
+            <a
+              href="#launch-dossier"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors"
+            >
+              VOLVER ARRIBA ↑
+            </a>
+            <button
+              id="btnCloseLaunchDossier"
+              type="button"
+              class="font-spacex text-xs font-bold tracking-[0.2em] text-zinc-300 hover:text-white uppercase transition-colors cursor-pointer"
+            >
+              ← VOLVER / CERRAR ×
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entrada Hero de pantalla completa estilo SpaceX al entrar a FINAL LAUNCH -->
+      <div
+        id="launchEntryHero"
+        class="nova-entry-hero border-b border-white/10 px-5 sm:px-10 lg:px-16 py-20"
+      >
+        <div
+          class="nova-entry-hero-bg"
+          style="background-image: linear-gradient(to right, rgba(0, 0, 0, 0.86) 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0.72) 100%), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2200&q=85');"
+        ></div>
+
+        <div class="nova-entry-content relative z-10 mx-auto w-full max-w-7xl">
+          <div class="max-w-4xl space-y-5">
+            <div class="font-mono text-xs sm:text-sm font-semibold tracking-[0.24em] text-cyan-400 uppercase">
+              NOVA MISSION · LANZAMIENTO FINAL
+            </div>
+
+            <h3 data-entry-letters class="font-spacex text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[0.06em] text-white uppercase leading-[0.98]">
+              FINAL LAUNCH
+            </h3>
+
+            <p class="max-w-xl text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+              Secuencia y registro operativo del lanzamiento final. Haz scroll hacia abajo para consultar el expediente de misión.
+            </p>
+
+            <div class="pt-2">
+              <button id="btnScrollLaunchDossier" type="button" class="btn-spacex">
+                <span>DESPLAZAR</span>
+                <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pointer-events-none hidden sm:flex flex-col items-center gap-3 absolute right-8 top-1/2 -translate-y-1/2 z-10 font-mono text-[10px] tracking-[0.3em] text-zinc-400 uppercase">
+          <span style="writing-mode: vertical-rl;">SCROLL</span>
+          <span class="h-12 w-px bg-white/30"></span>
+        </div>
+      </div>
+
+      <section id="launch-dossier-content" class="spacex-band-atmosphere relative w-full py-24 sm:py-32 px-5 sm:px-10 lg:px-16">
+        <div class="mx-auto max-w-7xl spacex-reveal space-y-8">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-4">
+            <h3 data-scroll-words class="font-spacex text-3xl sm:text-5xl font-extrabold tracking-[0.1em] text-white uppercase">
+              FINAL LAUNCH · MISIÓN
+            </h3>
+          </div>
+
+          <p data-scroll-words class="max-w-2xl text-sm sm:text-base lg:text-lg font-normal text-zinc-200 leading-relaxed">
+            Expediente preparado para incorporar los resultados definitivos del lanzamiento final.
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="border-t border-white/10 bg-black py-6 px-5 sm:px-10 lg:px-16">
+    <div class="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-3 font-spacex text-xs font-bold tracking-[0.22em] text-zinc-400 uppercase">
+      <span>NOVA</span>
+      <span>PRECISIÓN · TEST · FINAL LAUNCH</span>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- LÓGICA DE NAVEGACIÓN, SCROLL REVEAL, CHART.JS Y SIMULADORES 3D       -->
+  <!-- ===================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // -------------------------------------------------------------------
+      // 0. REPRODUCCIÓN AUTOMÁTICA DE VIDEOS LOCALES (PRES.MP4, TEST.MP4, EARTH.MP4)
+      // -------------------------------------------------------------------
+      const boundVideoUrls = {};
+
+      function initLocalVideoPlayback(videoId, candidatePaths, autoPlayLoop) {
+        const videoEl = document.getElementById(videoId);
+        if (!videoEl) return;
+
+        let idx = 0;
+        if (autoPlayLoop) {
+          videoEl.muted = true;
+          videoEl.defaultMuted = true;
+          videoEl.loop = true;
+          videoEl.playsInline = true;
+        }
+
+        function tryNextSource() {
+          if (idx >= candidatePaths.length) return;
+          const nextSrc = candidatePaths[idx++];
+          videoEl.src = nextSrc;
+          videoEl.load();
+          if (autoPlayLoop) {
+            videoEl.play().catch(() => {});
+          }
+        }
+
+        videoEl.addEventListener('error', () => {
+          tryNextSource();
+        });
+
+        videoEl.addEventListener('loadeddata', () => {
+          if (autoPlayLoop) {
+            videoEl.play().catch(() => {});
+          }
+        });
+
+        if (autoPlayLoop) {
+          videoEl.play().catch(() => {});
+        }
+      }
+
+      initLocalVideoPlayback('precisionBgVideo', ['./PRES.MP4', './pres.mp4', 'PRES.MP4', './PRES.MOV'], true);
+      initLocalVideoPlayback('precisionEntryVideo', ['./PRES.MP4', './pres.mp4', 'PRES.MP4', './PRES.MOV'], true);
+      initLocalVideoPlayback('testBgVideo', ['./TEST.MP4', './test.mp4', 'TEST.MP4', './TEST.MOV'], true);
+      initLocalVideoPlayback('testEntryVideo', ['./TEST.MP4', './test.mp4', 'TEST.MP4', './TEST.MOV'], true);
+      initLocalVideoPlayback('novaPreviewLoopVideo', ['./EARTH.MP4', './earth.mp4', 'EARTH.MP4', './EARTH.MOV'], true);
+      initLocalVideoPlayback('novaModalVideoPlayer', ['./EARTH.MP4', './earth.mp4', 'EARTH.MP4', './EARTH.MOV'], false);
+
+      function assignVideoToSlot(slot, file) {
+        if (!file) return;
+        if (boundVideoUrls[slot]) {
+          URL.revokeObjectURL(boundVideoUrls[slot]);
+        }
+        const blobUrl = URL.createObjectURL(file);
+        boundVideoUrls[slot] = blobUrl;
+
+        if (slot === 'earth') {
+          const previewVid = document.getElementById('novaPreviewLoopVideo');
+          const modalVid = document.getElementById('novaModalVideoPlayer');
+          const previewLbl = document.getElementById('novaPreviewVideoLabel');
+          const captionEl = document.getElementById('novaModalVideoCaption');
+          const statusEl = document.getElementById('novaVideoStatusLabel');
+          const sideLbl = document.getElementById('novaModalSideFileLabel');
+
+          if (previewVid) {
+            previewVid.src = blobUrl;
+            previewVid.load();
+            previewVid.play().catch(() => {});
+          }
+          if (modalVid) {
+            modalVid.src = blobUrl;
+            modalVid.load();
+          }
+          if (previewLbl) previewLbl.textContent = `ESTACIÓN TIERRA · ${file.name.toUpperCase()}`;
+          if (captionEl) captionEl.textContent = `ESTACIÓN TIERRA · ${file.name.toUpperCase()} (RECEPCIÓN LORA 915 MHZ)`;
+          if (statusEl) statusEl.textContent = `● ARCHIVO LOCAL: ${file.name.toUpperCase()}`;
+          if (sideLbl) sideLbl.textContent = file.name.toUpperCase();
+        }
+      }
+
+      // -------------------------------------------------------------------
+      // 1. NAVEGACIÓN MÓVIL Y RESALTADO DE SECCIÓN ACTIVA
+      // -------------------------------------------------------------------
+      const btnMobileMenu = document.getElementById('btnMobileMenu');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+      const menuIconOpen = document.getElementById('menuIconOpen');
+      const menuIconClose = document.getElementById('menuIconClose');
+
+      if (btnMobileMenu && mobileDrawer) {
+        btnMobileMenu.addEventListener('click', () => {
+          const isOpen = !mobileDrawer.classList.contains('hidden');
+          mobileDrawer.classList.toggle('hidden', isOpen);
+          btnMobileMenu.setAttribute('aria-expanded', String(!isOpen));
+          if (menuIconOpen) menuIconOpen.classList.toggle('hidden', !isOpen);
+          if (menuIconClose) menuIconClose.classList.toggle('hidden', isOpen);
+        });
+
+        mobileDrawer.querySelectorAll('.mobile-nav-link').forEach((link) => {
+          link.addEventListener('click', () => {
+            mobileDrawer.classList.add('hidden');
+            btnMobileMenu.setAttribute('aria-expanded', 'false');
+            if (menuIconOpen) menuIconOpen.classList.remove('hidden');
+            if (menuIconClose) menuIconClose.classList.add('hidden');
+          });
+        });
+      }
+
+      const sections = document.querySelectorAll('section[data-section]');
+      const navLinks = document.querySelectorAll('.nav-item');
+      let activeDossierKey = null;
+
+      function setNavHighlight(sectionKey) {
+        navLinks.forEach((link) => {
+          const isCurrent = link.getAttribute('data-nav-link') === sectionKey;
+          link.classList.toggle('text-white', isCurrent);
+          link.classList.toggle('border-white', isCurrent);
+          link.classList.toggle('text-zinc-300', !isCurrent);
+          link.classList.toggle('border-transparent', !isCurrent);
+        });
+      }
+
+      function updateActiveSection() {
+        if (activeDossierKey) {
+          setNavHighlight(activeDossierKey);
+          return;
+        }
+
+        const scrollPos = window.scrollY + window.innerHeight * 0.35;
+        let currentId = 'precision';
+
+        sections.forEach((sec) => {
+          if (sec.classList.contains('hidden')) return;
+          const top = sec.offsetTop;
+          const bottom = top + sec.offsetHeight;
+          if (scrollPos >= top && scrollPos < bottom) {
+            currentId = sec.getAttribute('data-section');
+          }
+        });
+
+        setNavHighlight(currentId);
+      }
+
+      window.addEventListener('scroll', updateActiveSection, { passive: true });
+      updateActiveSection();
+
+      // -------------------------------------------------------------------
+      // 2. REVELADO DE PALABRAS Y CONTEO DE NÚMEROS AL HACER SCROLL
+      // -------------------------------------------------------------------
+      document.querySelectorAll('[data-scroll-words]').forEach((el) => {
+        const rawText = el.textContent.trim().replace(/\s+/g, ' ');
+        if (!rawText) return;
+        const words = rawText.split(' ');
+        el.innerHTML = words
+          .map(
+            (word, idx) =>
+              `<span class="word-reveal" style="transition-delay: ${Math.min(idx * 35, 420)}ms">${word}</span>`
+          )
+          .join(' ');
+      });
+
+      function revealWordsInElement(container) {
+        if (!container) return;
+        container.querySelectorAll('.word-reveal').forEach((w, idx) => {
+          w.style.transitionDelay = `${Math.min(idx * 35, 420)}ms`;
+          w.classList.add('is-word-visible');
+        });
+      }
+
+      function sweepWordsOnScroll() {
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        document.querySelectorAll('.word-reveal').forEach((w) => {
+          const rect = w.getBoundingClientRect();
+          if (rect.top <= vh * 0.92 && rect.bottom >= -20) {
+            w.classList.add('is-word-visible');
+          } else if (rect.top > vh * 0.98) {
+            w.classList.remove('is-word-visible');
+          }
+        });
+      }
+
+      function animateCounterElement(el) {
+        if (!el) return;
+        el.classList.add('is-num-visible');
+
+        const target = parseFloat(el.getAttribute('data-count-target'));
+        const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+        const suffix = el.getAttribute('data-suffix') || '';
+
+        if (isNaN(target)) return;
+        if (el.dataset.animating === 'true') return;
+        el.dataset.animating = 'true';
+
+        const duration = 1150;
+        const startTime = performance.now();
+
+        function step(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const currentVal = target * eased;
+
+          el.textContent = `${currentVal.toFixed(decimals)}${suffix}`;
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = `${target.toFixed(decimals)}${suffix}`;
+            el.dataset.animating = 'false';
+          }
+        }
+
+        el.textContent = `${(0).toFixed(decimals)}${suffix}`;
+        requestAnimationFrame(step);
+      }
+
+      const wordObserver =
+        'IntersectionObserver' in window
+          ? new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting || entry.boundingClientRect.top < window.innerHeight * 0.92) {
+                    entry.target.classList.add('is-word-visible');
+                  } else if (entry.boundingClientRect.top > window.innerHeight * 0.98) {
+                    entry.target.classList.remove('is-word-visible');
+                  }
+                });
+              },
+              { threshold: 0.01, rootMargin: '0px 0px -5% 0px' }
+            )
+          : null;
+
+      document.querySelectorAll('.word-reveal').forEach((w) => {
+        if (wordObserver) wordObserver.observe(w);
+        else w.classList.add('is-word-visible');
+      });
+
+      window.addEventListener('scroll', sweepWordsOnScroll, { passive: true });
+      window.addEventListener('resize', sweepWordsOnScroll, { passive: true });
+      requestAnimationFrame(sweepWordsOnScroll);
+
+      const counterObserver =
+        'IntersectionObserver' in window
+          ? new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting) {
+                    animateCounterElement(entry.target);
+                  } else {
+                    entry.target.classList.remove('is-num-visible');
+                  }
+                });
+              },
+              { threshold: 0.25 }
+            )
+          : null;
+
+      document.querySelectorAll('[data-count-target]').forEach((numEl) => {
+        if (counterObserver) counterObserver.observe(numEl);
+        else animateCounterElement(numEl);
+      });
+
+      const revealEls = document.querySelectorAll('.spacex-reveal');
+      if ('IntersectionObserver' in window) {
+        const revealObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                revealWordsInElement(entry.target);
+                entry.target.querySelectorAll('[data-count-target]').forEach((numEl) => {
+                  animateCounterElement(numEl);
+                });
+              }
+            });
+          },
+          { threshold: 0.12 }
+        );
+        revealEls.forEach((el) => revealObserver.observe(el));
+      } else {
+        revealEls.forEach((el) => {
+          el.classList.add('is-visible');
+          revealWordsInElement(el);
+        });
+      }
+
+      // -------------------------------------------------------------------
+      // 3. ESPACIO EXCLUSIVO POR SECCIÓN Y PORTADA ANIMADA CON LETRAS
+      // -------------------------------------------------------------------
+      const overviewBlocks = document.querySelectorAll('[data-overview-block]');
+
+      const btnExplorePrecision = document.getElementById('btnExplorePrecision');
+      const precisionDossier = document.getElementById('precision-dossier');
+      const precisionEntryHero = document.getElementById('precisionEntryHero');
+      const btnReplayPrecisionEntry = document.getElementById('btnReplayPrecisionEntry');
+      const btnScrollPrecisionDossier = document.getElementById('btnScrollPrecisionDossier');
+      const btnClosePrecisionDossier = document.getElementById('btnClosePrecisionDossier');
+
+      const btnExploreTest = document.getElementById('btnExploreTest');
+      const testDossier = document.getElementById('test-dossier');
+      const testEntryHero = document.getElementById('testEntryHero');
+      const btnReplayTestEntry = document.getElementById('btnReplayTestEntry');
+      const btnScrollTestDossier = document.getElementById('btnScrollTestDossier');
+      const btnCloseTestDossier = document.getElementById('btnCloseTestDossier');
+
+      const btnExploreLaunch = document.getElementById('btnExploreLaunch');
+      const launchDossier = document.getElementById('launch-dossier');
+      const launchEntryHero = document.getElementById('launchEntryHero');
+      const btnReplayLaunchEntry = document.getElementById('btnReplayLaunchEntry');
+      const btnScrollLaunchDossier = document.getElementById('btnScrollLaunchDossier');
+      const btnCloseLaunchDossier = document.getElementById('btnCloseLaunchDossier');
+
+      const allDossiers = [precisionDossier, testDossier, launchDossier];
+
+      let precisionMediaInitialized = false;
+
+      // Prepara cada título de entrada ([data-entry-letters]) separando sus letras con retardo escalonado
+      document.querySelectorAll('[data-entry-letters]').forEach((titleEl) => {
+        let charIndex = 0;
+        const lines = titleEl.innerHTML.split(/<br\s*\/?>/i);
+        const rebuiltLines = lines.map((lineHtml) => {
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = lineHtml;
+          const plainLine = (tempDiv.textContent || '').trim().replace(/\s+/g, ' ');
+          if (!plainLine) return '';
+          return plainLine
+            .split(' ')
+            .map((word) => {
+              const letters = Array.from(word)
+                .map((ch) => {
+                  const span = `<span class="entry-letter" style="--char-idx:${charIndex++}">${ch}</span>`;
+                  return span;
+                })
+                .join('');
+              return `<span class="inline-block whitespace-nowrap">${letters}</span>`;
+            })
+            .join(' ');
+        });
+        titleEl.innerHTML = rebuiltLines.join('<br />');
+      });
+
+      function triggerHeroEntry(heroEl) {
+        if (!heroEl) return;
+        const entryVid = heroEl.querySelector('video');
+        if (entryVid) {
+          entryVid.play().catch(() => {});
+        }
+        heroEl.classList.remove('is-entered');
+        void heroEl.offsetWidth;
+        requestAnimationFrame(() => {
+          heroEl.classList.add('is-entered');
+        });
+      }
+
+      function resumeOverviewVideos() {
+        ['precisionBgVideo', 'testBgVideo'].forEach((vidId) => {
+          const vid = document.getElementById(vidId);
+          if (vid) {
+            vid.play().catch(() => {});
+          }
+        });
+      }
+
+      function openDossier(dossierEl, pushHistory = true) {
+        if (!dossierEl) return;
+
+        // Oculta las tarjetas principales y cualquier otro expediente para que no se mezclen
+        overviewBlocks.forEach((block) => block.classList.add('hidden'));
+        allDossiers.forEach((d) => {
+          if (d && d !== dossierEl) d.classList.add('hidden');
+        });
+
+        dossierEl.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'auto' });
+
+        dossierEl.querySelectorAll('.spacex-reveal').forEach((el) => el.classList.add('is-visible'));
+        revealWordsInElement(dossierEl);
+        dossierEl.querySelectorAll('[data-count-target]').forEach((numEl) => {
+          animateCounterElement(numEl);
+        });
+
+        if (dossierEl.id === 'precision-dossier') {
+          activeDossierKey = 'precision';
+          setNavHighlight('precision');
+          triggerHeroEntry(precisionEntryHero);
+          if (!precisionMediaInitialized) {
+            initPrecisionCharts();
+            initSim3D();
+            precisionMediaInitialized = true;
+          } else {
+            requestAnimationFrame(resizeSim3D);
+          }
+        } else if (dossierEl.id === 'test-dossier') {
+          activeDossierKey = 'test';
+          setNavHighlight('test');
+          triggerHeroEntry(testEntryHero);
+          initNovaTelemetrySection();
+          const previewVid = document.getElementById('novaPreviewLoopVideo');
+          if (previewVid) previewVid.play().catch(() => {});
+        } else if (dossierEl.id === 'launch-dossier') {
+          activeDossierKey = 'final-launch';
+          setNavHighlight('final-launch');
+          triggerHeroEntry(launchEntryHero);
+        }
+
+        if (pushHistory && window.history && typeof window.history.pushState === 'function') {
+          try {
+            window.history.pushState({ view: activeDossierKey }, '', `#${activeDossierKey}-view`);
+          } catch (e) {}
+        }
+
+        requestAnimationFrame(() => {
+          sweepWordsOnScroll();
+        });
+      }
+
+      function closeDossier(dossierEl, returnSectionId, pushHistory = true) {
+        const previousKey = activeDossierKey || returnSectionId;
+        activeDossierKey = null;
+
+        allDossiers.forEach((d) => {
+          if (d) d.classList.add('hidden');
+        });
+        overviewBlocks.forEach((block) => block.classList.remove('hidden'));
+        resumeOverviewVideos();
+
+        const targetId = returnSectionId || previousKey || 'precision';
+        const targetSec = document.getElementById(targetId);
+
+        if (pushHistory && window.history && typeof window.history.pushState === 'function') {
+          try {
+            window.history.pushState({ view: 'overview', section: targetId }, '', `#${targetId}`);
+          } catch (e) {}
+        }
+
+        if (targetSec) {
+          targetSec.scrollIntoView({ behavior: 'auto', block: 'start' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        }
+
+        updateActiveSection();
+        requestAnimationFrame(sweepWordsOnScroll);
+      }
+
+      // Navegación desde la barra superior (NOVA, PRECISIÓN, TEST, FINAL LAUNCH)
+      const brandHomeLink = document.getElementById('brandHomeLink');
+      if (brandHomeLink) {
+        brandHomeLink.addEventListener('click', (e) => {
+          if (activeDossierKey) {
+            e.preventDefault();
+            closeDossier(null, 'precision', true);
+          }
+        });
+      }
+
+      document.querySelectorAll('.nav-item, .mobile-nav-link').forEach((link) => {
+        link.addEventListener('click', (e) => {
+          const targetSection =
+            link.getAttribute('data-nav-link') ||
+            link.getAttribute('data-mobile-target') ||
+            (link.getAttribute('href') || '').replace('#', '');
+          if (activeDossierKey) {
+            e.preventDefault();
+            closeDossier(null, targetSection || 'precision', true);
+          }
+        });
+      });
+
+      // Soporte para flecha Atrás / Adelante del navegador
+      window.addEventListener('popstate', (event) => {
+        const state = event.state;
+        if (state && state.view === 'precision') {
+          openDossier(precisionDossier, false);
+        } else if (state && state.view === 'test') {
+          openDossier(testDossier, false);
+        } else if (state && state.view === 'final-launch') {
+          openDossier(launchDossier, false);
+        } else {
+          const hashSection = (window.location.hash || '').replace('#', '');
+          if (hashSection === 'precision-view') {
+            openDossier(precisionDossier, false);
+          } else if (hashSection === 'test-view') {
+            openDossier(testDossier, false);
+          } else if (hashSection === 'final-launch-view') {
+            openDossier(launchDossier, false);
+          } else {
+            const returnId =
+              (state && state.section) ||
+              (['precision', 'test', 'final-launch'].includes(hashSection) ? hashSection : 'precision');
+            closeDossier(null, returnId, false);
+          }
+        }
+      });
+
+      if (btnExplorePrecision) {
+        btnExplorePrecision.addEventListener('click', () => openDossier(precisionDossier));
+      }
+      if (btnReplayPrecisionEntry) {
+        btnReplayPrecisionEntry.addEventListener('click', () => {
+          if (precisionEntryHero) {
+            precisionEntryHero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            triggerHeroEntry(precisionEntryHero);
+          }
+        });
+      }
+      if (btnScrollPrecisionDossier) {
+        btnScrollPrecisionDossier.addEventListener('click', () => {
+          const target = document.getElementById('precision-dossier-content');
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+      if (btnClosePrecisionDossier) {
+        btnClosePrecisionDossier.addEventListener('click', () => closeDossier(precisionDossier, 'precision'));
+      }
+
+      if (btnExploreTest) {
+        btnExploreTest.addEventListener('click', () => openDossier(testDossier));
+      }
+      if (btnReplayTestEntry) {
+        btnReplayTestEntry.addEventListener('click', () => {
+          if (testEntryHero) {
+            testEntryHero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            triggerHeroEntry(testEntryHero);
+          }
+        });
+      }
+      if (btnScrollTestDossier) {
+        btnScrollTestDossier.addEventListener('click', () => {
+          const target = document.getElementById('nova-telemetry-storage');
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+      if (btnCloseTestDossier) {
+        btnCloseTestDossier.addEventListener('click', () => closeDossier(testDossier, 'test'));
+      }
+
+      if (btnExploreLaunch) {
+        btnExploreLaunch.addEventListener('click', () => openDossier(launchDossier));
+      }
+      if (btnReplayLaunchEntry) {
+        btnReplayLaunchEntry.addEventListener('click', () => {
+          if (launchEntryHero) {
+            launchEntryHero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            triggerHeroEntry(launchEntryHero);
+          }
+        });
+      }
+      if (btnScrollLaunchDossier) {
+        btnScrollLaunchDossier.addEventListener('click', () => {
+          const target = document.getElementById('launch-dossier-content');
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+      if (btnCloseLaunchDossier) {
+        btnCloseLaunchDossier.addEventListener('click', () => closeDossier(launchDossier, 'final-launch'));
+      }
+
+      // -------------------------------------------------------------------
+      // 4. DATOS DE LOS 5 ENSAYOS Y GRÁFICAS CHART.JS
+      // -------------------------------------------------------------------
+      const trialLabels = ['P1', 'P2', 'P3', 'P4', 'P5'];
+
+      function initPrecisionCharts() {
+        if (typeof Chart === 'undefined') return;
+
+        function createSafeChart(canvasId, config) {
+          try {
+            const canvasEl = document.getElementById(canvasId);
+            if (!canvasEl || !(canvasEl instanceof HTMLCanvasElement)) return null;
+            const ctx = canvasEl.getContext('2d');
+            if (!ctx) return null;
+            const existing = Chart.getChart(canvasEl);
+            if (existing) existing.destroy();
+            return new Chart(ctx, config);
+          } catch (err) {
+            console.warn(`Chart "${canvasId}" skipped:`, err);
+            return null;
+          }
+        }
+
+        Chart.defaults.color = '#9ca3af';
+        Chart.defaults.font.family = '"JetBrains Mono", monospace';
+        Chart.defaults.font.size = 11;
+
+        const baseOptions = {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(9, 12, 16, 0.95)',
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+              borderWidth: 1,
+              titleColor: '#ffffff',
+              bodyColor: '#e5e7eb',
+            },
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.06)' },
+              ticks: { color: '#cbd5e1' },
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.08)' },
+              ticks: { color: '#9ca3af' },
+            },
+          },
+        };
+
+        createSafeChart('chartAlcanceReal', {
+          type: 'bar',
+          data: {
+            labels: trialLabels,
+            datasets: [
+              {
+                label: 'Alcance Real (m)',
+                data: [32.0, 37.0, 33.0, 36.0, 35.0],
+                backgroundColor: 'rgba(34, 211, 238, 0.78)',
+                borderColor: '#22d3ee',
+                borderWidth: 1.5,
+                borderRadius: 2,
+              },
+            ],
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: { ...baseOptions.scales.y, min: 0, max: 40, ticks: { stepSize: 5, color: '#9ca3af' } },
+            },
+          },
+        });
+
+        createSafeChart('chartErrorAbsoluto', {
+          type: 'bar',
+          data: {
+            labels: trialLabels,
+            datasets: [
+              {
+                label: 'Error Absoluto (m)',
+                data: [2.7, 7.7, 3.7, 6.7, 5.7],
+                backgroundColor: 'rgba(248, 113, 113, 0.78)',
+                borderColor: '#f87171',
+                borderWidth: 1.5,
+                borderRadius: 2,
+              },
+            ],
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: { ...baseOptions.scales.y, min: 0, max: 8, ticks: { stepSize: 1, color: '#9ca3af' } },
+            },
+          },
+        });
+
+        createSafeChart('chartPresionNeumatica', {
+          type: 'line',
+          data: {
+            labels: trialLabels,
+            datasets: [
+              {
+                label: 'Presión (PSI)',
+                data: [50, 55, 60, 60, 50],
+                borderColor: '#4ade80',
+                backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                pointBackgroundColor: '#4ade80',
+                pointRadius: 4,
+                tension: 0.35,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: { ...baseOptions.scales.y, min: 50, max: 60, ticks: { stepSize: 1, color: '#9ca3af' } },
+            },
+          },
+        });
+
+        createSafeChart('chartVelocidadEscape', {
+          type: 'bar',
+          data: {
+            labels: trialLabels,
+            datasets: [
+              {
+                label: 'Vel. Escape (m/s)',
+                data: [24.5, 26.1, 27.6, 27.6, 24.5],
+                backgroundColor: 'rgba(250, 204, 21, 0.8)',
+                borderColor: '#facc15',
+                borderWidth: 1.5,
+                borderRadius: 2,
+              },
+            ],
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: { ...baseOptions.scales.y, min: 0, max: 30, ticks: { stepSize: 5, color: '#9ca3af' } },
+            },
+          },
+        });
+
+        createSafeChart('chartEmpujeTeorico', {
+          type: 'line',
+          data: {
+            labels: trialLabels,
+            datasets: [
+              {
+                label: 'Empuje (N)',
+                data: [18.2, 20.4, 22.8, 22.8, 18.2],
+                borderColor: '#c084fc',
+                backgroundColor: 'rgba(192, 132, 252, 0.2)',
+                pointBackgroundColor: '#c084fc',
+                pointRadius: 4,
+                tension: 0.35,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: { ...baseOptions.scales.y, min: 18.0, max: 23.0, ticks: { stepSize: 0.5, color: '#9ca3af' } },
+            },
+          },
+        });
+
+        createSafeChart('chartDispersionLateral', {
+          type: 'bar',
+          data: {
+            labels: trialLabels,
+            datasets: [
+              {
+                label: 'Dispersión Lateral (m)',
+                data: [1.1, 3.7, 2.0, 4.0, 2.9],
+                backgroundColor: 'rgba(59, 130, 246, 0.82)',
+                borderColor: '#60a5fa',
+                borderWidth: 1.5,
+                borderRadius: 2,
+              },
+            ],
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: { ...baseOptions.scales.y, min: 0, max: 4.5, ticks: { stepSize: 0.5, color: '#9ca3af' } },
+            },
+          },
+        });
+      }
+
+      // -------------------------------------------------------------------
+      // 5. SIMULADOR 3D DE TRAYECTORIA Y CAÍDA
+      // -------------------------------------------------------------------
+      let scene3D = null;
+      let renderer3D = null;
+      let camera3D = null;
+      let rocketMesh = null;
+      let rocketGlowMesh = null;
+      let trajectoryLine = null;
+      let trajectoryPoints3D = [];
+      let pulseRingOuter = null;
+      let pulseRingInner = null;
+      let simAnimFrame = null;
+      let simProgress = 1.0;
+      let simPlaying = false;
+      let activeSimTrial = 2;
+      let activeSimCam = 'fpv';
+      let orbitYaw = -0.52;
+      let orbitPitch = 0.44;
+      let orbitDistance = 42;
+      let isDraggingOrbit = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let axisMarkerEls = [];
+
+      const simTrialData = {
+        1: {
+          id: 1,
+          title: 'PRUEBA #1 (50 PSI)',
+          range: 32.0,
+          error: 2.7,
+          drift: 1.1,
+          driftSign: 1,
+          ve: '24.5 m/s',
+          apex: 10.6,
+          color: 0x38bdf8,
+          isIdeal: false,
+          status: 'FUERA DE DIANA (DESVIACIÓN POR VIENTO)',
+          statusClass: 'text-rose-400',
+        },
+        2: {
+          id: 2,
+          title: 'PRUEBA #2 (55 PSI)',
+          range: 37.0,
+          error: 7.7,
+          drift: 3.8,
+          driftSign: 1,
+          ve: '26.1 m/s',
+          apex: 12.2,
+          color: 0xf97316,
+          isIdeal: false,
+          status: 'FUERA DE DIANA (DESVIACIÓN POR VIENTO)',
+          statusClass: 'text-rose-400',
+        },
+        3: {
+          id: 3,
+          title: 'PRUEBA #3 (60 PSI)',
+          range: 33.0,
+          error: 3.7,
+          drift: 2.1,
+          driftSign: -1,
+          ve: '27.6 m/s',
+          apex: 11.4,
+          color: 0x4ade80,
+          isIdeal: false,
+          status: 'FUERA DE DIANA (DESVIACIÓN POR VIENTO)',
+          statusClass: 'text-rose-400',
+        },
+        4: {
+          id: 4,
+          title: 'PRUEBA #4 (60 PSI)',
+          range: 36.0,
+          error: 6.7,
+          drift: 4.0,
+          driftSign: 1,
+          ve: '27.6 m/s',
+          apex: 12.8,
+          color: 0xc084fc,
+          isIdeal: false,
+          status: 'FUERA DE DIANA (DESVIACIÓN POR VIENTO)',
+          statusClass: 'text-rose-400',
+        },
+        5: {
+          id: 5,
+          title: 'PRUEBA #5 (50 PSI)',
+          range: 35.0,
+          error: 5.7,
+          drift: 2.9,
+          driftSign: -1,
+          ve: '24.5 m/s',
+          apex: 11.9,
+          color: 0xfb7185,
+          isIdeal: false,
+          status: 'FUERA DE DIANA (DESVIACIÓN POR VIENTO)',
+          statusClass: 'text-rose-400',
+        },
+        ideal: {
+          id: 'ideal',
+          title: 'REFERENCIA IDEAL (SIN VIENTO)',
+          range: 29.3,
+          error: 0.0,
+          drift: 0.0,
+          driftSign: 1,
+          ve: '29.3 m/s',
+          apex: 10.2,
+          color: 0x34d399,
+          isIdeal: true,
+          status: 'IMPACTO EN TAPETE (29.3 m · SIN VIENTO)',
+          statusClass: 'text-emerald-400',
+        },
+      };
+
+      const simCamMeta = {
+        fpv: {
+          label: 'FPV PERSECUCIÓN + PANEO 3D',
+          yaw: -0.48,
+          pitch: 0.36,
+          dist: 36,
+        },
+        iso: {
+          label: 'ISOMETRÍA DE CAMPO (3/4 3D)',
+          yaw: -0.78,
+          pitch: 0.56,
+          dist: 48,
+        },
+        top: {
+          label: 'CENITAL DE DRON (TOP-DOWN)',
+          yaw: 0.0,
+          pitch: 1.44,
+          dist: 46,
+        },
+      };
+
+      const simTrialButtons = document.querySelectorAll('.sim-trial-btn');
+      const simCamButtons = document.querySelectorAll('.sim-cam-btn');
+      const simTimelineScrubber = document.getElementById('simTimelineScrubber');
+      const simTimelinePercent = document.getElementById('simTimelinePercent');
+      const btnSimReset = document.getElementById('btnSimReset');
+      const btnSimReplay = document.getElementById('btnSimReplay');
+      const btnSimReplayIcon = document.getElementById('btnSimReplayIcon');
+      const btnSimReplayLabel = document.getElementById('btnSimReplayLabel');
+      const btnSimCenterOrbit = document.getElementById('btnSimCenterOrbit');
+
+      function computeRocketSample(t, trial) {
+        const clamped = Math.max(0, Math.min(1, t));
+        const x = trial.range * clamped;
+        const y = 4 * trial.apex * clamped * (1 - clamped);
+        const z = trial.drift * trial.driftSign * Math.pow(clamped, 1.3);
+        return new THREE.Vector3(x, y, z);
+      }
+
+      function rebuildTrajectoryPath(trial) {
+        if (!scene3D) return;
+
+        if (trajectoryLine) {
+          scene3D.remove(trajectoryLine);
+          trajectoryLine.geometry.dispose();
+          trajectoryLine.material.dispose();
+          trajectoryLine = null;
+        }
+
+        const segments = 96;
+        trajectoryPoints3D = [];
+        for (let i = 0; i <= segments; i++) {
+          trajectoryPoints3D.push(computeRocketSample(i / segments, trial));
+        }
+
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(trajectoryPoints3D);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: trial.color,
+          transparent: true,
+          opacity: 0.92,
+        });
+        trajectoryLine = new THREE.Line(lineGeo, lineMat);
+        scene3D.add(trajectoryLine);
+
+        const impactX = trial.range;
+        const impactZ = trial.drift * trial.driftSign;
+        if (pulseRingOuter) pulseRingOuter.position.set(impactX, 0.05, impactZ);
+        if (pulseRingInner) pulseRingInner.position.set(impactX, 0.06, impactZ);
+      }
+
+      function syncReplayButtonUI() {
+        if (!btnSimReplayIcon || !btnSimReplayLabel) return;
+        if (simPlaying) {
+          btnSimReplayIcon.textContent = '❚❚';
+          btnSimReplayLabel.textContent = 'Pausar Vuelo';
+        } else {
+          btnSimReplayIcon.textContent = '▶';
+          btnSimReplayLabel.textContent = 'Repetir Vuelo';
+        }
+      }
+
+      function updateSimHUDAndOverlay(trial, rocketPos, nowSec) {
+        const pct = Math.round(simProgress * 100);
+        if (simTimelineScrubber) simTimelineScrubber.value = String(pct);
+        if (simTimelinePercent) simTimelinePercent.textContent = `${pct}%`;
+
+        const hudTitle = document.getElementById('hudTrialTitle');
+        const hudCamMode = document.getElementById('hudCamMode');
+        const hudDistance = document.getElementById('hudDistance');
+        const hudAltitude = document.getElementById('hudAltitude');
+        const hudDrift = document.getElementById('hudDrift');
+        const hudVelEscape = document.getElementById('hudVelEscape');
+        const hudStatusText = document.getElementById('hudStatusText');
+
+        if (hudTitle) hudTitle.textContent = trial.title;
+        if (hudCamMode && simCamMeta[activeSimCam]) {
+          hudCamMode.textContent = simCamMeta[activeSimCam].label;
+        }
+        if (hudDistance) hudDistance.textContent = `${Math.max(0, rocketPos.x).toFixed(1)} m`;
+        if (hudAltitude) hudAltitude.textContent = `${Math.max(0, rocketPos.y).toFixed(1)} m`;
+        if (hudDrift) hudDrift.textContent = `${Math.abs(rocketPos.z).toFixed(1)} m`;
+        if (hudVelEscape) hudVelEscape.textContent = trial.ve;
+        if (hudStatusText) {
+          hudStatusText.textContent = trial.status;
+          hudStatusText.className = trial.statusClass;
+        }
+
+        if (pulseRingOuter && pulseRingInner) {
+          const wave = 0.5 + 0.5 * Math.sin((nowSec || 0) * 4.5);
+          pulseRingOuter.scale.setScalar(0.85 + wave * 0.55);
+          pulseRingInner.scale.setScalar(0.75 + (1 - wave) * 0.45);
+        }
+
+        const container = document.getElementById('sim3dContainer');
+        if (!container || !camera3D) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        if (!w || !h) return;
+
+        function projectToScreen(vec3) {
+          const v = vec3.clone().project(camera3D);
+          return {
+            x: (v.x * 0.5 + 0.5) * w,
+            y: (-v.y * 0.5 + 0.5) * h,
+            visible: v.z < 1,
+          };
+        }
+
+        const pillEl = document.getElementById('simTrajectoryPill');
+        if (pillEl) {
+          const sampleT = Math.max(0.2, Math.min(0.85, simProgress > 0.05 ? simProgress : 0.62));
+          const pillAnchor = computeRocketSample(sampleT, trial).add(new THREE.Vector3(0, 2.2, 0));
+          const proj = projectToScreen(pillAnchor);
+
+          const pRange = document.getElementById('pillRangeText');
+          const pError = document.getElementById('pillErrorText');
+          const pDrift = document.getElementById('pillDriftText');
+          if (pRange) pRange.textContent = `ALCANCE: ${trial.range.toFixed(1)}m`;
+          if (pError) pError.textContent = `ERROR: ${trial.error.toFixed(1)}m`;
+          if (pDrift) pDrift.textContent = `DERIVA: ${trial.drift.toFixed(1)}m`;
+
+          if (proj.visible) {
+            pillEl.style.left = `${Math.max(95, Math.min(w - 130, proj.x))}px`;
+            pillEl.style.top = `${Math.max(48, Math.min(h - 60, proj.y))}px`;
+          }
+        }
+
+        const targetLabelEl = document.getElementById('simTargetLabel');
+        if (targetLabelEl) {
+          const tProj = projectToScreen(new THREE.Vector3(29.3, 0.2, 4.4));
+          if (tProj.visible) {
+            targetLabelEl.style.left = `${Math.max(48, Math.min(w - 60, tProj.x))}px`;
+            targetLabelEl.style.top = `${Math.max(24, Math.min(h - 32, tProj.y))}px`;
+          }
+        }
+
+        axisMarkerEls.forEach((item) => {
+          const mProj = projectToScreen(new THREE.Vector3(item.meters, 0.1, -2.2));
+          if (mProj.visible && mProj.x > 16 && mProj.x < w - 24 && mProj.y > 20 && mProj.y < h - 24) {
+            item.el.style.opacity = '0.75';
+            item.el.style.left = `${mProj.x}px`;
+            item.el.style.top = `${mProj.y}px`;
+          } else {
+            item.el.style.opacity = '0';
+          }
+        });
+      }
+
+      function selectSimTrial(trialId) {
+        const trial = simTrialData[trialId];
+        if (!trial) return;
+        activeSimTrial = trialId;
+
+        simTrialButtons.forEach((btn) => {
+          const isMatch = btn.getAttribute('data-sim-trial') === String(trialId);
+          btn.classList.toggle('border-orange-500/80', isMatch);
+          btn.classList.toggle('bg-orange-500/15', isMatch);
+          btn.classList.toggle('border-white/15', !isMatch);
+          btn.classList.toggle('bg-black/65', !isMatch);
+        });
+
+        rebuildTrajectoryPath(trial);
+        simProgress = 1.0;
+        simPlaying = false;
+        syncReplayButtonUI();
+
+        const pos = computeRocketSample(simProgress, trial);
+        if (rocketMesh) rocketMesh.position.copy(pos);
+        if (rocketGlowMesh) rocketGlowMesh.position.copy(pos);
+        updateSimHUDAndOverlay(trial, pos, performance.now() / 1000);
+      }
+
+      function selectSimCamera(camKey) {
+        const meta = simCamMeta[camKey];
+        if (!meta) return;
+        activeSimCam = camKey;
+        orbitYaw = meta.yaw;
+        orbitPitch = meta.pitch;
+        orbitDistance = meta.dist;
+
+        simCamButtons.forEach((btn) => {
+          const key = btn.getAttribute('data-sim-cam');
+          const active = key === camKey;
+          btn.classList.toggle('border-orange-500/80', active);
+          btn.classList.toggle('bg-orange-500/15', active);
+          btn.classList.toggle('border-white/15', !active);
+          btn.classList.toggle('bg-black/60', !active);
+
+          const badge = btn.querySelector(`[data-cam-badge="${key}"]`);
+          if (badge) {
+            if (active) {
+              badge.textContent = 'ACTIVA';
+              badge.className = 'rounded-[2px] bg-orange-500 px-2 py-0.5 font-mono text-[10px] font-bold text-black uppercase';
+            } else {
+              badge.textContent = key === 'fpv' ? 'FPV-3D' : key === 'iso' ? '3/4 3D' : 'TOP-DOWN';
+              badge.className = 'font-mono text-[10px] text-zinc-500 uppercase';
+            }
+          }
+        });
+      }
+
+      function updateOrbitCamera(rocketPos, nowSec) {
+        if (!camera3D) return;
+
+        let targetFocus = new THREE.Vector3(21.0, 2.5, 0.0);
+        if (activeSimCam === 'fpv') {
+          const tNow = nowSec || 0;
+          const trial = simTrialData[activeSimTrial] || simTrialData[2];
+          const nextPos = computeRocketSample(Math.min(1, simProgress + 0.04), trial);
+          const dir = nextPos.clone().sub(rocketPos);
+          if (dir.lengthSq() < 0.0001) {
+            dir.set(trial.range, -0.4, trial.drift * trial.driftSign);
+          }
+          dir.normalize();
+
+          const backDist = 14.5;
+          const panSide = Math.sin(tNow * 0.55) * 4.5;
+          const panLift = 5.4 + Math.cos(tNow * 0.42) * 1.1;
+
+          const desiredCamPos = new THREE.Vector3(
+            rocketPos.x - dir.x * backDist + panSide * 0.35,
+            Math.max(2.6, rocketPos.y + panLift),
+            rocketPos.z - dir.z * backDist + panSide
+          );
+
+          const aheadFocus = new THREE.Vector3(
+            rocketPos.x + dir.x * 9.5,
+            Math.max(0.8, rocketPos.y * 0.65),
+            rocketPos.z + dir.z * 9.5
+          );
+
+          camera3D.position.lerp(desiredCamPos, 0.14);
+          camera3D.lookAt(aheadFocus);
+          return;
+        } else if (activeSimCam === 'iso') {
+          targetFocus = new THREE.Vector3(20.0, 2.0, 0.0);
+          const cosPitch = Math.cos(orbitPitch);
+          const camX = targetFocus.x + Math.cos(orbitYaw) * cosPitch * orbitDistance;
+          const camY = Math.max(4.0, targetFocus.y + Math.sin(orbitPitch) * orbitDistance);
+          const camZ = targetFocus.z + Math.sin(orbitYaw) * cosPitch * orbitDistance;
+          camera3D.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.14);
+        } else {
+          targetFocus = new THREE.Vector3(20.5, 0.0, 0.0);
+          camera3D.position.lerp(new THREE.Vector3(targetFocus.x, orbitDistance, targetFocus.z + 0.01), 0.16);
+        }
+
+        camera3D.lookAt(targetFocus);
+      }
+
+      function resizeSim3D() {
+        const container = document.getElementById('sim3dContainer');
+        if (!container || !renderer3D || !camera3D) return;
+        const w = container.clientWidth || 680;
+        const h = container.clientHeight || 520;
+        camera3D.aspect = w / h;
+        camera3D.updateProjectionMatrix();
+        renderer3D.setSize(w, h);
+      }
+
+      function probeWebGLSupport() {
+        try {
+          const probeCanvas = document.createElement('canvas');
+          const gl =
+            probeCanvas.getContext('webgl2') ||
+            probeCanvas.getContext('webgl') ||
+            probeCanvas.getContext('experimental-webgl');
+          if (!gl) return false;
+          const loseExt = gl.getExtension && gl.getExtension('WEBGL_lose_context');
+          if (loseExt) loseExt.loseContext();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      class Canvas3DFallbackRenderer {
+        constructor(width, height) {
+          this.domElement = document.createElement('canvas');
+          this.domElement.style.display = 'block';
+          this.domElement.style.width = '100%';
+          this.domElement.style.height = '100%';
+          this.ctx = this.domElement.getContext('2d');
+          this.pixelRatio = 1;
+          this.width = width || 680;
+          this.height = height || 520;
+          this.setSize(this.width, this.height);
+        }
+
+        setPixelRatio(ratio) {
+          this.pixelRatio = Math.min(ratio || 1, 2);
+          this.setSize(this.width, this.height);
+        }
+
+        setSize(width, height) {
+          this.width = Math.max(1, width);
+          this.height = Math.max(1, height);
+          this.domElement.width = Math.round(this.width * this.pixelRatio);
+          this.domElement.height = Math.round(this.height * this.pixelRatio);
+        }
+
+        projectVertex(worldVec, camera, halfW, halfH) {
+          const viewVec = worldVec.clone().applyMatrix4(camera.matrixWorldInverse);
+          if (viewVec.z >= -0.15) {
+            return { x: 0, y: 0, z: viewVec.z, valid: false };
+          }
+          const ndc = viewVec.clone().applyMatrix4(camera.projectionMatrix);
+          return {
+            x: (ndc.x * 0.5 + 0.5) * (halfW * 2),
+            y: (-ndc.y * 0.5 + 0.5) * (halfH * 2),
+            z: viewVec.z,
+            valid: true,
+          };
+        }
+
+        render(scene, camera) {
+          const ctx = this.ctx;
+          if (!ctx || !scene || !camera) return;
+
+          scene.updateMatrixWorld();
+          camera.updateMatrixWorld();
+          camera.updateProjectionMatrix();
+
+          const dpr = this.pixelRatio;
+          const w = this.width;
+          const h = this.height;
+          const halfW = w * 0.5;
+          const halfH = h * 0.5;
+
+          ctx.save();
+          ctx.scale(dpr, dpr);
+
+          const bgHex = scene.background && scene.background.isColor ? `#${scene.background.getHexString()}` : '#06090f';
+          ctx.fillStyle = bgHex;
+          ctx.fillRect(0, 0, w, h);
+
+          const drawables = [];
+          const tmpA = new THREE.Vector3();
+          const tmpB = new THREE.Vector3();
+
+          scene.traverse((obj) => {
+            if (!obj.visible || !obj.geometry) return;
+
+            if (obj.isLine || obj.isLineSegments) {
+              const posAttr = obj.geometry.attributes && obj.geometry.attributes.position;
+              if (!posAttr) return;
+              const colAttr = obj.geometry.attributes && obj.geometry.attributes.color;
+              const baseColor =
+                obj.material && obj.material.color ? `#${obj.material.color.getHexString()}` : '#334155';
+              const opacity = obj.material && obj.material.opacity !== undefined ? obj.material.opacity : 1;
+              const step = obj.isLineSegments ? 2 : 1;
+              const limit = posAttr.count - 1;
+
+              for (let i = 0; i < limit; i += step) {
+                tmpA.fromBufferAttribute(posAttr, i).applyMatrix4(obj.matrixWorld);
+                tmpB.fromBufferAttribute(posAttr, i + 1).applyMatrix4(obj.matrixWorld);
+                const pA = this.projectVertex(tmpA, camera, halfW, halfH);
+                const pB = this.projectVertex(tmpB, camera, halfW, halfH);
+                if (!pA.valid || !pB.valid) continue;
+
+                let strokeColor = baseColor;
+                if (colAttr) {
+                  const r = Math.round(colAttr.getX(i) * 255);
+                  const g = Math.round(colAttr.getY(i) * 255);
+                  const b = Math.round(colAttr.getZ(i) * 255);
+                  strokeColor = `rgb(${r},${g},${b})`;
+                }
+
+                drawables.push({
+                  kind: 'line',
+                  depth: (pA.z + pB.z) * 0.5,
+                  pA,
+                  pB,
+                  color: strokeColor,
+                  alpha: opacity,
+                  width: obj.isLineSegments ? 1 : 2.4,
+                });
+              }
+            } else if (obj.isMesh && obj.geometry.parameters) {
+              const gType = obj.geometry.type;
+              if (gType === 'RingGeometry') {
+                const posAttr = obj.geometry.attributes && obj.geometry.attributes.position;
+                const thetaSegs = obj.geometry.parameters.thetaSegments || 32;
+                if (!posAttr || posAttr.count < thetaSegs + 2) return;
+                const ringStart = thetaSegs + 1;
+                const pts = [];
+                let depthSum = 0;
+                for (let s = 0; s <= thetaSegs; s++) {
+                  tmpA.fromBufferAttribute(posAttr, ringStart + s).applyMatrix4(obj.matrixWorld);
+                  const proj = this.projectVertex(tmpA, camera, halfW, halfH);
+                  if (proj.valid) {
+                    pts.push(proj);
+                    depthSum += proj.z;
+                  }
+                }
+                if (pts.length > 3) {
+                  drawables.push({
+                    kind: 'ring',
+                    depth: depthSum / pts.length,
+                    pts,
+                    color: obj.material && obj.material.color ? `#${obj.material.color.getHexString()}` : '#f97316',
+                    alpha: obj.material && obj.material.opacity !== undefined ? obj.material.opacity : 0.85,
+                  });
+                }
+              } else if (gType === 'SphereGeometry') {
+                obj.getWorldPosition(tmpA);
+                const proj = this.projectVertex(tmpA, camera, halfW, halfH);
+                if (!proj.valid) return;
+                const worldRad = (obj.geometry.parameters.radius || 0.4) * Math.max(obj.scale.x, obj.scale.y);
+                const focalPx = halfH / Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5));
+                const screenRad = Math.max(3, (worldRad * focalPx) / Math.abs(proj.z));
+                drawables.push({
+                  kind: 'sphere',
+                  depth: proj.z,
+                  x: proj.x,
+                  y: proj.y,
+                  r: screenRad,
+                  color: obj.material && obj.material.color ? `#${obj.material.color.getHexString()}` : '#ffffff',
+                  alpha: obj.material && obj.material.opacity !== undefined ? obj.material.opacity : 1,
+                });
+              }
+            }
+          });
+
+          drawables.sort((a, b) => a.depth - b.depth);
+
+          for (let i = 0; i < drawables.length; i++) {
+            const d = drawables[i];
+            ctx.globalAlpha = d.alpha;
+            if (d.kind === 'line') {
+              ctx.strokeStyle = d.color;
+              ctx.lineWidth = d.width;
+              ctx.beginPath();
+              ctx.moveTo(d.pA.x, d.pA.y);
+              ctx.lineTo(d.pB.x, d.pB.y);
+              ctx.stroke();
+            } else if (d.kind === 'ring') {
+              ctx.strokeStyle = d.color;
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(d.pts[0].x, d.pts[0].y);
+              for (let j = 1; j < d.pts.length; j++) {
+                ctx.lineTo(d.pts[j].x, d.pts[j].y);
+              }
+              ctx.closePath();
+              ctx.stroke();
+            } else if (d.kind === 'sphere') {
+              ctx.fillStyle = d.color;
+              ctx.beginPath();
+              ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          ctx.restore();
+        }
+      }
+
+      function createSafeThreeRenderer(width, height) {
+        if (probeWebGLSupport()) {
+          const configs = [
+            { antialias: true, powerPreference: 'high-performance' },
+            { antialias: false, powerPreference: 'default', failIfMajorPerformanceCaveat: false },
+          ];
+          const origConsoleError = console.error;
+          for (let i = 0; i < configs.length; i++) {
+            try {
+              console.error = function () {};
+              const glRenderer = new THREE.WebGLRenderer(configs[i]);
+              console.error = origConsoleError;
+              return glRenderer;
+            } catch (err) {
+              console.error = origConsoleError;
+            }
+          }
+        }
+        return new Canvas3DFallbackRenderer(width, height);
+      }
+
+      function initSim3D() {
+        const container = document.getElementById('sim3dContainer');
+        const markersBox = document.getElementById('simAxisMarkersContainer');
+        if (!container || typeof THREE === 'undefined') return;
+
+        const w = container.clientWidth || 680;
+        const h = container.clientHeight || 520;
+
+        renderer3D = createSafeThreeRenderer(w, h);
+        if (renderer3D && renderer3D.domElement) {
+          renderer3D.domElement.addEventListener('webglcontextlost', (ev) => {
+            ev.preventDefault();
+            const cw = container.clientWidth || 680;
+            const ch = container.clientHeight || 520;
+            renderer3D = new Canvas3DFallbackRenderer(cw, ch);
+            renderer3D.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            container.innerHTML = '';
+            container.appendChild(renderer3D.domElement);
+          });
+        }
+
+        scene3D = new THREE.Scene();
+        scene3D.background = new THREE.Color(0x06090f);
+        scene3D.fog = new THREE.FogExp2(0x06090f, 0.0075);
+
+        camera3D = new THREE.PerspectiveCamera(45, w / h, 0.1, 300);
+
+        renderer3D.setSize(w, h);
+        renderer3D.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        container.innerHTML = '';
+        container.appendChild(renderer3D.domElement);
+
+        scene3D.add(new THREE.AmbientLight(0x94a3b8, 0.7));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.15);
+        keyLight.position.set(24, 36, 22);
+        scene3D.add(keyLight);
+
+        const planeGeo = new THREE.PlaneGeometry(140, 100);
+        planeGeo.rotateX(-Math.PI / 2);
+        const planeMat = new THREE.MeshStandardMaterial({
+          color: 0x070b12,
+          roughness: 0.92,
+          metalness: 0.05,
+        });
+        const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+        planeMesh.position.set(25, 0, 0);
+        scene3D.add(planeMesh);
+
+        const grid = new THREE.GridHelper(120, 60, 0x263244, 0x111824);
+        grid.position.set(25, 0.01, 0);
+        scene3D.add(grid);
+
+        const axisPoints = [new THREE.Vector3(-4, 0.03, 0), new THREE.Vector3(62, 0.03, 0)];
+        const axisGeo = new THREE.BufferGeometry().setFromPoints(axisPoints);
+        const axisMat = new THREE.LineBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.7 });
+        scene3D.add(new THREE.Line(axisGeo, axisMat));
+
+        const matX = 29.3;
+        const ringRadii = [1.0, 2.2, 3.5, 4.8];
+        ringRadii.forEach((rad, idx) => {
+          const rGeo = new THREE.RingGeometry(Math.max(0.15, rad - 0.14), rad, 48);
+          rGeo.rotateX(-Math.PI / 2);
+          const rMat = new THREE.MeshBasicMaterial({
+            color: idx === 0 ? 0xfb923c : 0xea580c,
+            transparent: true,
+            opacity: 0.85 - idx * 0.12,
+            side: THREE.DoubleSide,
+          });
+          const ring = new THREE.Mesh(rGeo, rMat);
+          ring.position.set(matX, 0.035, 0);
+          scene3D.add(ring);
+        });
+
+        const outerPulseGeo = new THREE.RingGeometry(0.9, 1.35, 36);
+        outerPulseGeo.rotateX(-Math.PI / 2);
+        pulseRingOuter = new THREE.Mesh(
+          outerPulseGeo,
+          new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.85, side: THREE.DoubleSide })
+        );
+        pulseRingOuter.position.y = 0.05;
+        scene3D.add(pulseRingOuter);
+
+        const innerPulseGeo = new THREE.RingGeometry(0.25, 0.55, 32);
+        innerPulseGeo.rotateX(-Math.PI / 2);
+        pulseRingInner = new THREE.Mesh(
+          innerPulseGeo,
+          new THREE.MeshBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0.95, side: THREE.DoubleSide })
+        );
+        pulseRingInner.position.y = 0.06;
+        scene3D.add(pulseRingInner);
+
+        rocketMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.42, 20, 20),
+          new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        scene3D.add(rocketMesh);
+
+        rocketGlowMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.85, 20, 20),
+          new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.45 })
+        );
+        scene3D.add(rocketGlowMesh);
+
+        if (markersBox) {
+          markersBox.innerHTML = '';
+          axisMarkerEls = [10, 20, 30, 40, 50, 60].map((m) => {
+            const el = document.createElement('div');
+            el.className = 'font-mono text-[10px] text-slate-400 -translate-x-1/2 transition-opacity duration-150';
+            el.textContent = `${m}m`;
+            markersBox.appendChild(el);
+            return { meters: m, el };
+          });
+        }
+
+        const domElem = renderer3D.domElement;
+        domElem.addEventListener('pointerdown', (e) => {
+          isDraggingOrbit = true;
+          dragStartX = e.clientX;
+          dragStartY = e.clientY;
+        });
+
+        window.addEventListener('pointerup', () => {
+          isDraggingOrbit = false;
+        });
+
+        window.addEventListener('pointermove', (e) => {
+          if (!isDraggingOrbit) return;
+          const dx = e.clientX - dragStartX;
+          const dy = e.clientY - dragStartY;
+          dragStartX = e.clientX;
+          dragStartY = e.clientY;
+          orbitYaw -= dx * 0.008;
+          orbitPitch = Math.max(0.14, Math.min(1.5, orbitPitch + dy * 0.007));
+        });
+
+        domElem.addEventListener(
+          'wheel',
+          (e) => {
+            e.preventDefault();
+            orbitDistance = Math.max(16, Math.min(82, orbitDistance + e.deltaY * 0.03));
+          },
+          { passive: false }
+        );
+
+        selectSimCamera(activeSimCam);
+        selectSimTrial(activeSimTrial);
+        window.addEventListener('resize', resizeSim3D);
+
+        let lastMs = performance.now();
+        function renderLoop(nowMs) {
+          simAnimFrame = requestAnimationFrame(renderLoop);
+          const dt = Math.min((nowMs - lastMs) / 1000, 0.05);
+          lastMs = nowMs;
+
+          const trial = simTrialData[activeSimTrial] || simTrialData[2];
+
+          if (simPlaying) {
+            simProgress += dt * 0.36;
+            if (simProgress >= 1.0) {
+              simProgress = 1.0;
+              simPlaying = false;
+              syncReplayButtonUI();
+            }
+          }
+
+          const rocketPos = computeRocketSample(simProgress, trial);
+          if (rocketMesh) rocketMesh.position.copy(rocketPos);
+          if (rocketGlowMesh) {
+            rocketGlowMesh.position.copy(rocketPos);
+            rocketGlowMesh.scale.setScalar(0.95 + 0.25 * Math.sin(nowMs * 0.01));
+          }
+
+          updateOrbitCamera(rocketPos, nowMs / 1000);
+          updateSimHUDAndOverlay(trial, rocketPos, nowMs / 1000);
+
+          if (renderer3D && scene3D && camera3D) {
+            renderer3D.render(scene3D, camera3D);
+          }
+        }
+
+        if (simAnimFrame) cancelAnimationFrame(simAnimFrame);
+        simAnimFrame = requestAnimationFrame(renderLoop);
+      }
+
+      simTrialButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const val = btn.getAttribute('data-sim-trial');
+          selectSimTrial(val === 'ideal' ? 'ideal' : parseInt(val, 10));
+        });
+      });
+
+      simCamButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const camKey = btn.getAttribute('data-sim-cam');
+          if (camKey) selectSimCamera(camKey);
+        });
+      });
+
+      if (btnSimCenterOrbit) {
+        btnSimCenterOrbit.addEventListener('click', () => {
+          selectSimCamera(activeSimCam);
+        });
+      }
+
+      if (simTimelineScrubber) {
+        simTimelineScrubber.addEventListener('input', () => {
+          simPlaying = false;
+          syncReplayButtonUI();
+          simProgress = Math.max(0, Math.min(1, parseFloat(simTimelineScrubber.value) / 100));
+          const trial = simTrialData[activeSimTrial] || simTrialData[2];
+          const pos = computeRocketSample(simProgress, trial);
+          if (rocketMesh) rocketMesh.position.copy(pos);
+          if (rocketGlowMesh) rocketGlowMesh.position.copy(pos);
+          updateSimHUDAndOverlay(trial, pos, performance.now() / 1000);
+        });
+      }
+
+      if (btnSimReset) {
+        btnSimReset.addEventListener('click', () => {
+          simProgress = 0;
+          simPlaying = false;
+          syncReplayButtonUI();
+          const trial = simTrialData[activeSimTrial] || simTrialData[2];
+          const pos = computeRocketSample(0, trial);
+          if (rocketMesh) rocketMesh.position.copy(pos);
+          if (rocketGlowMesh) rocketGlowMesh.position.copy(pos);
+          updateSimHUDAndOverlay(trial, pos, performance.now() / 1000);
+        });
+      }
+
+      if (btnSimReplay) {
+        btnSimReplay.addEventListener('click', () => {
+          if (simPlaying) {
+            simPlaying = false;
+          } else {
+            if (simProgress >= 0.999) simProgress = 0;
+            simPlaying = true;
+          }
+          syncReplayButtonUI();
+        });
+      }
+
+      // -------------------------------------------------------------------
+      // 6. EXPEDIENTE TEST: TELEMETRÍA NOVA (36 PAQUETES), GRÁFICAS Y VIDEO
+      // -------------------------------------------------------------------
+      const novaPacketsData = [
+        // Prueba 12 m (16 paquetes)
+        { d: 12, p: 1, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.46, ay: 9.96, az: 0.68, tot: 10.0, srv: 0, tmp: 30.9, prs: 646.0, sats: 0, gps: 0, lat: 0.0, lon: 0.0, rssi: -75 },
+        { d: 12, p: 2, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.42, ay: 9.83, az: 2.15, tot: 10.08, srv: 0, tmp: 30.9, prs: 646.0, sats: 13, gps: 1, lat: 18.8778, lon: -99.1922, rssi: -74 },
+        { d: 12, p: 3, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.42, ay: 9.82, az: 1.6, tot: 9.96, srv: 0, tmp: 30.9, prs: 646.0, sats: 13, gps: 1, lat: 18.8778, lon: -99.1922, rssi: -74 },
+        { d: 12, p: 4, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.22, ay: 9.99, az: 0.68, tot: 10.02, srv: 0, tmp: 30.9, prs: 646.0, sats: 13, gps: 1, lat: 18.8778, lon: -99.1922, rssi: -76 },
+        { d: 12, p: 5, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.43, ay: 9.56, az: 2.87, tot: 9.99, srv: 0, tmp: 30.9, prs: 646.0, sats: 13, gps: 1, lat: 18.8778, lon: -99.1922, rssi: -81 },
+        { d: 12, p: 6, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.41, ay: 9.93, az: 0.62, tot: 9.96, srv: 0, tmp: 30.8, prs: 646.0, sats: 13, gps: 1, lat: 18.8778, lon: -99.1922, rssi: -79 },
+        { d: 12, p: 7, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.41, ay: 9.88, az: 0.49, tot: 9.9, srv: 0, tmp: 30.8, prs: 646.0, sats: 13, gps: 1, lat: 18.8778, lon: -99.1922, rssi: -78 },
+        { d: 12, p: 8, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.38, ay: 9.89, az: 0.72, tot: 9.92, srv: 0, tmp: 30.8, prs: 646.0, sats: 13, gps: 1, lat: 18.8778, lon: -99.1922, rssi: -78 },
+        { d: 12, p: 9, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.43, ay: 9.85, az: 0.68, tot: 9.88, srv: 0, tmp: 30.8, prs: 646.0, sats: 13, gps: 1, lat: 18.8778, lon: -99.1922, rssi: -77 },
+        { d: 12, p: 10, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.41, ay: 9.88, az: 0.31, tot: 9.9, srv: 0, tmp: 30.0, prs: 646.0, sats: 16, gps: 1, lat: 18.8778, lon: -99.1921, rssi: -83 },
+        { d: 12, p: 11, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.45, ay: 9.87, az: 0.31, tot: 9.89, srv: 0, tmp: 30.0, prs: 646.0, sats: 16, gps: 1, lat: 18.8778, lon: -99.1921, rssi: -83 },
+        { d: 12, p: 12, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.37, ay: 9.87, az: 0.36, tot: 9.88, srv: 0, tmp: 29.9, prs: 646.0, sats: 16, gps: 1, lat: 18.8778, lon: -99.1921, rssi: -82 },
+        { d: 12, p: 13, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.42, ay: 9.93, az: 0.39, tot: 9.95, srv: 0, tmp: 29.9, prs: 646.0, sats: 16, gps: 1, lat: 18.8778, lon: -99.1921, rssi: -82 },
+        { d: 12, p: 14, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.43, ay: 9.91, az: 0.37, tot: 9.93, srv: 0, tmp: 29.9, prs: 646.0, sats: 16, gps: 1, lat: 18.8778, lon: -99.1921, rssi: -82 },
+        { d: 12, p: 15, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.39, ay: 9.93, az: 0.43, tot: 9.94, srv: 0, tmp: 29.9, prs: 646.0, sats: 16, gps: 1, lat: 18.8778, lon: -99.1921, rssi: -83 },
+        { d: 12, p: 16, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.41, ay: 9.96, az: 0.36, tot: 9.97, srv: 0, tmp: 29.9, prs: 646.0, sats: 16, gps: 1, lat: 18.8778, lon: -99.1921, rssi: -86 },
+        // Prueba 22 m (11 paquetes)
+        { d: 22, p: 1, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.06, ay: 9.85, az: 0.66, tot: 9.88, srv: 0, tmp: 28.6, prs: 645.8, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -76 },
+        { d: 22, p: 2, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.1, ay: 9.8, az: 0.63, tot: 9.82, srv: 0, tmp: 28.6, prs: 645.9, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -75 },
+        { d: 22, p: 3, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.05, ay: 9.84, az: 0.64, tot: 9.86, srv: 0, tmp: 28.6, prs: 645.9, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -74 },
+        { d: 22, p: 4, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.06, ay: 9.83, az: 0.64, tot: 9.85, srv: 0, tmp: 28.6, prs: 645.9, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -73 },
+        { d: 22, p: 5, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.08, ay: 9.83, az: 0.65, tot: 9.85, srv: 0, tmp: 28.6, prs: 645.9, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -73 },
+        { d: 22, p: 6, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.07, ay: 9.8, az: 0.64, tot: 9.82, srv: 0, tmp: 28.6, prs: 645.9, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -73 },
+        { d: 22, p: 7, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.07, ay: 9.81, az: 0.65, tot: 9.84, srv: 0, tmp: 28.6, prs: 645.9, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -74 },
+        { d: 22, p: 8, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.1, ay: 9.85, az: 0.65, tot: 9.87, srv: 0, tmp: 28.6, prs: 645.8, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -75 },
+        { d: 22, p: 9, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.11, ay: 9.81, az: 0.67, tot: 9.83, srv: 0, tmp: 28.6, prs: 645.8, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -76 },
+        { d: 22, p: 10, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.11, ay: 9.82, az: 0.64, tot: 9.84, srv: 0, tmp: 28.6, prs: 645.9, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -77 },
+        { d: 22, p: 11, sys: 'NOVA', pant: 0, anim: 0, mpu: 1, ax: 0.09, ay: 9.83, az: 0.69, tot: 9.85, srv: 0, tmp: 28.6, prs: 645.9, sats: 19, gps: 1, lat: 18.8776, lon: -99.192, rssi: -76 },
+        // Prueba 31 m (9 paquetes)
+        { d: 31, p: 1, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.06, ay: 9.85, az: 0.66, tot: 9.88, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -78 },
+        { d: 31, p: 2, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.1, ay: 9.8, az: 0.63, tot: 9.82, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -80 },
+        { d: 31, p: 3, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.05, ay: 9.84, az: 0.64, tot: 9.86, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -80 },
+        { d: 31, p: 4, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.06, ay: 9.83, az: 0.64, tot: 9.85, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -80 },
+        { d: 31, p: 5, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.06, ay: 9.85, az: 0.66, tot: 9.88, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -80 },
+        { d: 31, p: 6, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.1, ay: 9.8, az: 0.63, tot: 9.82, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -82 },
+        { d: 31, p: 7, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.1, ay: 9.8, az: 0.63, tot: 9.82, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -81 },
+        { d: 31, p: 8, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.05, ay: 9.84, az: 0.64, tot: 9.86, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -82 },
+        { d: 31, p: 9, sys: 'NOVA', pant: 2, anim: 0, mpu: 1, ax: 0.05, ay: 9.84, az: 0.64, tot: 9.86, srv: 1, tmp: 28.6, prs: 645.8, sats: 18, gps: 1, lat: 18.8776, lon: -99.1919, rssi: -80 },
+      ];
+
+      let novaTelemetryInitialized = false;
+      let selectedNovaDist = 'all';
+      let selectedNovaStatus = 'all';
+
+      function getFilteredNovaPackets() {
+        return novaPacketsData.filter((row) => {
+          const distMatch = selectedNovaDist === 'all' || String(row.d) === selectedNovaDist;
+          const statusMatch =
+            selectedNovaStatus === 'all' ||
+            (selectedNovaStatus === 'servo' && row.srv === 1) ||
+            (selectedNovaStatus === 'gps' && row.gps === 1);
+          return distMatch && statusMatch;
+        });
+      }
+
+      function renderNovaPacketTable() {
+        const tbody = document.getElementById('novaPacketTableBody');
+        const counterBadge = document.getElementById('novaLogCounterBadge');
+        if (!tbody) return;
+
+        const filtered = getFilteredNovaPackets();
+        tbody.innerHTML = filtered
+          .map((r) => {
+            const distClass =
+              r.d === 12 ? 'text-cyan-400 font-bold' : r.d === 22 ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold';
+            const srvClass = r.srv === 1 ? 'text-amber-400 font-bold' : 'text-zinc-500';
+            const gpsClass = r.gps === 1 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+            return `
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="py-2.5 px-3 font-semibold text-white">#${r.p}</td>
+                <td class="py-2.5 px-3 ${distClass}">${r.d} m</td>
+                <td class="py-2.5 px-3">${r.sys}</td>
+                <td class="py-2.5 px-3">${r.pant}</td>
+                <td class="py-2.5 px-3">${r.anim}</td>
+                <td class="py-2.5 px-3 text-emerald-400">${r.mpu}</td>
+                <td class="py-2.5 px-3">${r.ax.toFixed(2)}</td>
+                <td class="py-2.5 px-3">${r.ay.toFixed(2)}</td>
+                <td class="py-2.5 px-3">${r.az.toFixed(2)}</td>
+                <td class="py-2.5 px-3 font-semibold text-white">${r.tot.toFixed(2)}</td>
+                <td class="py-2.5 px-3 ${srvClass}">${r.srv}</td>
+                <td class="py-2.5 px-3">${r.tmp.toFixed(1)}</td>
+                <td class="py-2.5 px-3">${r.prs.toFixed(1)}</td>
+                <td class="py-2.5 px-3">${r.sats}</td>
+                <td class="py-2.5 px-3 ${gpsClass}">${r.gps}</td>
+                <td class="py-2.5 px-3">${r.lat ? r.lat.toFixed(4) : '0.0000'}</td>
+                <td class="py-2.5 px-3">${r.lon ? r.lon.toFixed(4) : '0.0000'}</td>
+                <td class="py-2.5 px-3 font-semibold text-cyan-300">${r.rssi}</td>
+              </tr>
+            `;
+          })
+          .join('');
+
+        if (counterBadge) {
+          counterBadge.textContent = `MOSTRANDO ${filtered.length} / ${novaPacketsData.length} PAQUETES`;
+        }
+      }
+
+      function initNovaCharts() {
+        if (typeof Chart === 'undefined') return;
+
+        function createSafeChart(id, cfg) {
+          try {
+            const el = document.getElementById(id);
+            if (!el || !(el instanceof HTMLCanvasElement)) return null;
+            const ctx = el.getContext('2d');
+            if (!ctx) return null;
+            const prev = Chart.getChart(el);
+            if (prev) prev.destroy();
+            return new Chart(ctx, cfg);
+          } catch (e) {
+            return null;
+          }
+        }
+
+        Chart.defaults.color = '#9ca3af';
+        Chart.defaults.font.family = '"JetBrains Mono", monospace';
+        Chart.defaults.font.size = 11;
+
+        const rssi12 = novaPacketsData.filter((r) => r.d === 12).map((r) => r.rssi);
+        const rssi22 = novaPacketsData.filter((r) => r.d === 22).map((r) => r.rssi);
+        const rssi31 = novaPacketsData.filter((r) => r.d === 31).map((r) => r.rssi);
+
+        createSafeChart('chartNovaRssiSeries', {
+          type: 'line',
+          data: {
+            labels: Array.from({ length: 16 }, (_, i) => `P${i + 1}`),
+            datasets: [
+              {
+                label: '12 m',
+                data: rssi12,
+                borderColor: '#22d3ee',
+                backgroundColor: 'rgba(34,211,238,0.15)',
+                pointRadius: 3,
+                tension: 0.3,
+              },
+              {
+                label: '22 m',
+                data: rssi22,
+                borderColor: '#34d399',
+                backgroundColor: 'rgba(52,211,153,0.15)',
+                pointRadius: 3,
+                tension: 0.3,
+              },
+              {
+                label: '31 m',
+                data: rssi31,
+                borderColor: '#fbbf24',
+                backgroundColor: 'rgba(251,191,36,0.15)',
+                pointRadius: 3,
+                tension: 0.3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: true, labels: { color: '#e5e7eb', boxWidth: 10, font: { size: 10 } } },
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#cbd5e1' } },
+              y: { min: -90, max: -68, grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#9ca3af' } },
+            },
+          },
+        });
+
+        createSafeChart('chartNovaRssiStats', {
+          type: 'bar',
+          data: {
+            labels: ['12 m', '22 m', '31 m'],
+            datasets: [
+              {
+                label: 'Promedio',
+                data: [-79.56, -74.73, -80.33],
+                backgroundColor: 'rgba(52, 211, 153, 0.8)',
+                borderColor: '#34d399',
+                borderWidth: 1,
+              },
+              {
+                label: 'Máximo',
+                data: [-74, -73, -78],
+                backgroundColor: 'rgba(34, 211, 238, 0.78)',
+                borderColor: '#22d3ee',
+                borderWidth: 1,
+              },
+              {
+                label: 'Mínimo',
+                data: [-86, -77, -82],
+                backgroundColor: 'rgba(248, 113, 113, 0.78)',
+                borderColor: '#f87171',
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: true, labels: { color: '#e5e7eb', boxWidth: 10, font: { size: 10 } } },
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#cbd5e1' } },
+              y: { min: -90, max: -65, grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#9ca3af' } },
+            },
+          },
+        });
+
+        createSafeChart('chartNovaAccelGps', {
+          type: 'bar',
+          data: {
+            labels: ['12 m', '22 m', '31 m'],
+            datasets: [
+              {
+                label: 'Acel. Total (m/s²)',
+                data: [9.95, 9.85, 9.85],
+                backgroundColor: 'rgba(251, 191, 36, 0.82)',
+                borderColor: '#fbbf24',
+                borderWidth: 1,
+              },
+              {
+                label: 'Satélites GPS',
+                data: [14.4, 19.0, 18.0],
+                backgroundColor: 'rgba(192, 132, 252, 0.8)',
+                borderColor: '#c084fc',
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: true, labels: { color: '#e5e7eb', boxWidth: 10, font: { size: 10 } } },
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#cbd5e1' } },
+              y: { min: 0, max: 22, grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#9ca3af' } },
+            },
+          },
+        });
+      }
+
+      function initNovaTelemetrySection() {
+        if (!novaTelemetryInitialized) {
+          renderNovaPacketTable();
+          initNovaCharts();
+
+          document.querySelectorAll('.nova-dist-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              selectedNovaDist = btn.getAttribute('data-nova-dist') || 'all';
+              document.querySelectorAll('.nova-dist-btn').forEach((b) => {
+                const active = b.getAttribute('data-nova-dist') === selectedNovaDist;
+                b.classList.toggle('bg-white', active);
+                b.classList.toggle('text-black', active);
+                b.classList.toggle('border-white', active);
+                b.classList.toggle('bg-black/60', !active);
+                b.classList.toggle('text-zinc-300', !active);
+                b.classList.toggle('border-white/20', !active);
+              });
+              renderNovaPacketTable();
+            });
+          });
+
+          document.querySelectorAll('.nova-status-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              selectedNovaStatus = btn.getAttribute('data-nova-status') || 'all';
+              document.querySelectorAll('.nova-status-btn').forEach((b) => {
+                const active = b.getAttribute('data-nova-status') === selectedNovaStatus;
+                b.classList.toggle('border-cyan-400', active);
+                b.classList.toggle('bg-cyan-400/15', active);
+                b.classList.toggle('text-cyan-300', active);
+                b.classList.toggle('border-white/20', !active);
+                b.classList.toggle('bg-black/60', !active);
+                b.classList.toggle('text-zinc-300', !active);
+              });
+              renderNovaPacketTable();
+            });
+          });
+
+          const btnExportCsv = document.getElementById('btnExportNovaCsv');
+          if (btnExportCsv) {
+            btnExportCsv.addEventListener('click', () => {
+              const rows = getFilteredNovaPackets();
+              const headers = [
+                'Paquete',
+                'Distancia_m',
+                'Sistema',
+                'Pantalla',
+                'Anim',
+                'MPU_OK',
+                'Ax',
+                'Ay',
+                'Az',
+                'Total_ms2',
+                'Servo',
+                'Temp_C',
+                'Pres_mmHg',
+                'Sats',
+                'GPS_OK',
+                'Lat',
+                'Lon',
+                'RSSI_dBm',
+              ];
+              const lines = [
+                headers.join(','),
+                ...rows.map((r) =>
+                  [
+                    r.p,
+                    r.d,
+                    r.sys,
+                    r.pant,
+                    r.anim,
+                    r.mpu,
+                    r.ax,
+                    r.ay,
+                    r.az,
+                    r.tot,
+                    r.srv,
+                    r.tmp,
+                    r.prs,
+                    r.sats,
+                    r.gps,
+                    r.lat,
+                    r.lon,
+                    r.rssi,
+                  ].join(',')
+                ),
+              ];
+              const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `NOVA_TELEMETRIA_${selectedNovaDist.toUpperCase()}.csv`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            });
+          }
+
+          // Reproductor modal estilo SpaceX ("ESTACIÓN TIERRA" · EARTH.MP4) + carga local
+          const previewCard = document.getElementById('novaEstacionTierraPreviewCard');
+          const previewVideo = document.getElementById('novaPreviewLoopVideo');
+          const btnOpenModal = document.getElementById('btnOpenEstacionTierraModal');
+          const btnCloseModal = document.getElementById('btnCloseEstacionTierraModal');
+          const modalEl = document.getElementById('novaSpaceXVideoModal');
+          const modalPlayer = document.getElementById('novaModalVideoPlayer');
+          const videoFileInput = document.getElementById('novaVideoFileInput');
+
+          if (previewVideo) {
+            previewVideo.play().catch(() => {});
+          }
+
+          function openVideoModal() {
+            if (!modalEl) return;
+            modalEl.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            if (modalPlayer) {
+              modalPlayer.play().catch(() => {});
+            }
+          }
+
+          function closeVideoModal() {
+            if (!modalEl) return;
+            modalEl.classList.add('hidden');
+            document.body.style.overflow = '';
+            if (modalPlayer) {
+              modalPlayer.pause();
+            }
+          }
+
+          if (previewCard) {
+            previewCard.addEventListener('click', openVideoModal);
+            previewCard.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openVideoModal();
+              }
+            });
+          }
+          if (btnOpenModal) btnOpenModal.addEventListener('click', openVideoModal);
+          if (btnCloseModal) btnCloseModal.addEventListener('click', closeVideoModal);
+
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalEl && !modalEl.classList.contains('hidden')) {
+              closeVideoModal();
+            }
+          });
+
+          if (videoFileInput) {
+            videoFileInput.addEventListener('change', (e) => {
+              const file = e.target && e.target.files && e.target.files[0];
+              if (!file) return;
+              assignVideoToSlot('earth', file);
+            });
+          }
+
+          novaTelemetryInitialized = true;
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
